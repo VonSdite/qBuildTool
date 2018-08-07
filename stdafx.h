@@ -39,15 +39,15 @@
 #include <set>
 #include <afx.h>
 #include <afxinet.h>
+#include <fstream>
 
-#define RECVPACK_SIZE 2048
+#include "zlib/unzip.h"
+#pragma comment(lib, "zlib/zlibwapi.lib") 
 
-CString ExeCmd(CString pszCmd, CString szPath);                 // 执行命令行
-std::set<CString> SplitCString(CString strSrc, CString strGap); // 分割CString字符串
-CString GetDefaultBranch(CString strSrc);						// 获取默认分支字符串
-bool DownloadSaveFiles(LPCTSTR url,LPCTSTR strSaveFile);		//下载文件并保存为新文件名
+#include "JsonHelper.h"
+#pragma comment(lib, "json/json.lib")
 
-
+#include "Function.h"
 
 
 #ifdef _UNICODE

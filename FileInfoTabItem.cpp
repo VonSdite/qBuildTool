@@ -61,7 +61,6 @@ BOOL CFileInfoTabItem::OnInitDialog()
 	dwStyle	  |=   LVS_EX_FULLROWSELECT;			//选中某行使整行高亮
 	m_lvwFileInfo.SetExtendedStyle(dwStyle);   //设置扩展风格
 
-
 	//插入列
 	m_lvwFileInfo.InsertColumn( 0, L"文件名", LVCFMT_LEFT, 120 );
 	m_lvwFileInfo.InsertColumn( 1, L"MD5", LVCFMT_LEFT, 200 );

@@ -7,6 +7,7 @@
 #include "afxwin.h"
 #include "FileInfoTabItem.h"
 #include "LogTabItem.h"
+#include "CParseWorker.h"
 
 // CQbuildAutoToolDlg dialog
 class CQbuildAutoToolDlg : public CDialog
@@ -14,6 +15,7 @@ class CQbuildAutoToolDlg : public CDialog
 // Construction
 public:
 	CQbuildAutoToolDlg(CWnd* pParent = NULL);	// standard constructor
+	void SendLogInfo(CString strLogInfo);
 
 // Dialog Data
 	enum { IDD = IDD_QbuildAutoTool_DIALOG };
@@ -35,11 +37,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	CComboBox m_cmbBranch;
-	CTabCtrl m_tabFileInfo;
+	CComboBox			m_cmbBranch;
+	CTabCtrl			m_tabFileInfo;
     CFileInfoTabItem	m_tabItemFileInfo;
     CLogTabItem			m_tabItemLog;
-
+    CThreadPool<CParseWorker> m_thrdpoolParse;
     BOOL isEditGitPathChange;
 
 public:
@@ -47,7 +49,7 @@ public:
     afx_msg void OnBnClickedPushFile();
     afx_msg void OnBnClickedGetFile();
     afx_msg void OnBnClickedBrowse();
-    afx_msg void OnCbnSelchangeComboBranch();
+    //afx_msg void OnCbnSelchangeComboBranch();
     afx_msg void OnTcnSelchangeTab2(NMHDR *pNMHDR, LRESULT *pResult);
     afx_msg void OnEnKillfocusEditGitPath();
 
@@ -55,4 +57,5 @@ public:
     //afx_msg void OnSize(UINT nType, int cx, int cy);
     //void ReSize();
     afx_msg void OnEnChangeEditGitPath();
+	afx_msg void OnCbnSelchangeComboBranch();
 };

@@ -39,3 +39,5 @@
 *.idb
 *.htm
 *.ncb
+Temp/*
+Debug/*

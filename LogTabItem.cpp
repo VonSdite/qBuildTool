@@ -12,6 +12,7 @@ IMPLEMENT_DYNAMIC(CLogTabItem, CDialog)
 
 CLogTabItem::CLogTabItem(CWnd* pParent /*=NULL*/)
 	: CDialog(CLogTabItem::IDD, pParent)
+	, m_tbLog(_T(""))
 {
 
 }
@@ -23,8 +24,15 @@ CLogTabItem::~CLogTabItem()
 void CLogTabItem::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+	DDX_Text(pDX, IDC_EDIT_LOG, m_tbLog);
+	DDX_Control(pDX, IDC_EDIT_LOG, m_cbEditLog);
 }
 
+void CLogTabItem::Update(CString strVal)
+{
+	m_tbLog = strVal;
+	UpdateData(TRUE);
+}
 
 BEGIN_MESSAGE_MAP(CLogTabItem, CDialog)
 	ON_WM_CTLCOLOR()

@@ -45,7 +45,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_CRT_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories=""
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_CRT_SECURE_NO_WARNINGS;ZLIB_WINAPI"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -68,6 +69,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -100,7 +102,7 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="2"
-			CharacterSet="0"
+			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -186,7 +188,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\CParseWorker.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\FileInfoTabItem.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\JsonHelper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Function.cpp"
 				>
 			</File>
 			<File
@@ -228,7 +242,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\CParseWorker.h"
+				>
+			</File>
+			<File
 				RelativePath=".\FileInfoTabItem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Function.h"
+				>
+			</File>
+			<File
+				RelativePath=".\JsonHelper.h"
 				>
 			</File>
 			<File

@@ -1,4 +1,6 @@
 #pragma once
+#include "afxwin.h"
+#include "Resource.h"
 
 
 // CLogTab dialog
@@ -10,6 +12,7 @@ class CLogTabItem : public CDialog
 public:
 	CLogTabItem(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CLogTabItem();
+	void Update(CString strVal);
 
 // Dialog Data
 	enum { IDD = IDD_LOG };
@@ -20,4 +23,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	CString m_tbLog;
+	CEdit m_cbEditLog;
 };
