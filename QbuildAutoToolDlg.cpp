@@ -67,6 +67,7 @@ BEGIN_MESSAGE_MAP(CQbuildAutoToolDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_GET_FILE, &CQbuildAutoToolDlg::OnBnClickedGetFile)
 	ON_BN_CLICKED(IDC_BUTTON_BROWSE, &CQbuildAutoToolDlg::OnBnClickedBrowse)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB2, &CQbuildAutoToolDlg::OnTcnSelchangeTab2)
+    ON_MESSAGE(WM_SUCCESS_DOWNLOAD, &CQbuildAutoToolDlg::OnSuccessDownloadFile)
 ON_EN_KILLFOCUS(IDC_EDIT_GIT_PATH, &CQbuildAutoToolDlg::OnEnKillfocusEditGitPath)
 ON_EN_CHANGE(IDC_EDIT_GIT_PATH, &CQbuildAutoToolDlg::OnEnChangeEditGitPath)
 ON_CBN_SELCHANGE(IDC_COMBO_BRANCH, &CQbuildAutoToolDlg::OnCbnSelchangeComboBranch)
@@ -387,9 +388,19 @@ void CQbuildAutoToolDlg::OnBnClickedGetFile()
     CTaskBase *pTask = NULL;
 	for (; iterUrl!= iterUrlEnd; iterUrl++)
 	{
-        pTask = new CTask(*iterUrl, strSavePath);
+        pTask = new CDownloadTask(this->GetSafeHwnd(), *iterUrl, strSavePath);
         m_thrdpoolParse.QueueRequest((CParseWorker::RequestType) pTask);
 	}
+}
+
+LRESULT CQbuildAutoToolDlg::OnSuccessDownloadFile(WPARAM wParam, LPARAM lParam)
+{
+    CString *pstrFileName = (CString *)wParam;
+    CTaskBase *pTask = NULL;
+    pTask = new CUnzipTask(this->GetSafeHwnd(), *pstrFileName);
+    m_thrdpoolParse.QueueRequest((CParseWorker::RequestType) pTask);
+    delete pstrFileName;
+    return TRUE;
 }
 
 /////////////////////////////////////////“文件入库”按钮////////////////////////////////////////////////////
@@ -450,5 +461,3 @@ void CQbuildAutoToolDlg::SendLogInfo(CString strLogInfo)
 {
 	m_tabItemLog.m_cbEditLog.SetWindowText(strLogInfo);
 }
-
-

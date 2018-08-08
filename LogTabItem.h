@@ -2,7 +2,6 @@
 #include "afxwin.h"
 #include "Resource.h"
 
-
 // CLogTab dialog
 
 class CLogTabItem : public CDialog

@@ -3,7 +3,7 @@
 #include <atlutil.h>
 
 class CTaskBase;
-class CTask;
+class CDownloadTask;
 
 class CParseWorker
 {
@@ -31,15 +31,27 @@ public:
     virtual void DoTask(void *pvParam, OVERLAPPED *pOverlapped)=0;
 };
 
-class CTask : public CTaskBase
+class CDownloadTask : public CTaskBase
 {
 public:
-    CTask(CString url, CString strSavePath);
+    CDownloadTask(HWND hWnd, CString url, CString strSavePath);
 
     void DoTask(void *pvParam, OVERLAPPED *pOverlapped);
 
 private:
     CString m_strUrl;
     CString m_strSavePath;
+    HWND m_hWnd;
 };
 
+class CUnzipTask : public CTaskBase
+{
+public:
+    CUnzipTask(HWND hWnd, CString strFilePath);
+
+    void DoTask(void *pvParam, OVERLAPPED *pOverlapped);
+
+private:
+    CString m_strFilePath;
+    HWND m_hWnd;
+};

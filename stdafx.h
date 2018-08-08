@@ -36,6 +36,8 @@
 
 #include <afxcontrolbars.h>     // MFC support for ribbons and control bars
 
+
+
 #include <set>
 #include <afx.h>
 #include <afxinet.h>
@@ -48,7 +50,8 @@
 #pragma comment(lib, "json/json.lib")
 
 #include "Function.h"
-
+#define WM_FILE_INFO_UPADTE (WM_USER+1)
+#define WM_SUCCESS_DOWNLOAD (WM_USER+2)
 
 #ifdef _UNICODE
 #if defined _M_IX86

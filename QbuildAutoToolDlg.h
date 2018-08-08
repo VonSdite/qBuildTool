@@ -58,4 +58,5 @@ public:
     //void ReSize();
     afx_msg void OnEnChangeEditGitPath();
 	afx_msg void OnCbnSelchangeComboBranch();
+    afx_msg LRESULT OnSuccessDownloadFile(WPARAM, LPARAM);
 };

@@ -24,13 +24,11 @@ public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnRclickList2(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnCopyMenu();
-
     virtual BOOL OnInitDialog();
 
-	// 对话框最大化
+    // 对话框最大化
 	//afx_msg void OnSize(UINT nType, int cx, int cy);
 
-private:
+public:
     CListCtrl m_lvwFileInfo;
-
 };
