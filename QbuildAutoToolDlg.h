@@ -15,7 +15,6 @@ class CQbuildAutoToolDlg : public CDialog
 // Construction
 public:
 	CQbuildAutoToolDlg(CWnd* pParent = NULL);	// standard constructor
-	void SendLogInfo(CString strLogInfo);
 
 // Dialog Data
 	enum { IDD = IDD_QbuildAutoTool_DIALOG };
@@ -59,4 +58,6 @@ public:
     afx_msg void OnEnChangeEditGitPath();
 	afx_msg void OnCbnSelchangeComboBranch();
     afx_msg LRESULT OnSuccessDownloadFile(WPARAM, LPARAM);
+    afx_msg LRESULT OnLogDownloadStatus(WPARAM, LPARAM);
+    afx_msg LRESULT OnShowFileInfo(WPARAM, LPARAM);
 };

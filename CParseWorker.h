@@ -2,6 +2,11 @@
 
 #include <atlutil.h>
 
+#define WM_FILE_INFO_UPADTE     (WM_USER+1)
+#define WM_SUCCESS_DOWNLOAD     (WM_USER+2)
+#define WM_COMPLETE_DOWNLOAD    (WM_USER+4)
+#define WM_SHOW_FILE_INFO       (WM_USER+5)
+
 class CTaskBase;
 class CDownloadTask;
 
@@ -38,8 +43,8 @@ public:
 
     void DoTask(void *pvParam, OVERLAPPED *pOverlapped);
 
-private:
     CString m_strUrl;
+private:
     CString m_strSavePath;
     HWND m_hWnd;
 };
@@ -54,4 +59,15 @@ public:
 private:
     CString m_strFilePath;
     HWND m_hWnd;
+};
+
+struct FILE_INFO
+{
+    CString         strFileName;
+    CString         strMd5;
+    CString         strVersion;
+    DWORD           dwSize;
+    CString         strSignTime;
+    BOOL            fUpdate;
+    CString         strFileLocation;
 };

@@ -11,7 +11,7 @@
 IMPLEMENT_DYNAMIC(CFileInfoTabItem, CDialog)
 
 CFileInfoTabItem::CFileInfoTabItem(CWnd* pParent /*=NULL*/)
-	: CDialog(CFileInfoTabItem::IDD, pParent)
+	: CDialog(CFileInfoTabItem::IDD, pParent), m_dwRow(0)
 {
 
 }
@@ -70,27 +70,24 @@ BOOL CFileInfoTabItem::OnInitDialog()
 	m_lvwFileInfo.InsertColumn( 5, L"是否有更新", LVCFMT_LEFT, 80 );
 	m_lvwFileInfo.InsertColumn( 6, L"对应存放位置", LVCFMT_LEFT, 1920 );
 
-	//插入行
-	int nRow = m_lvwFileInfo.InsertItem(0, L"360BAEClient.exe");
-	//设置数据
-	m_lvwFileInfo.SetItemText(nRow, 1, L"BBF2456792346563FGHSGSHERH");
-	m_lvwFileInfo.SetItemText(nRow, 2, L"6.3.0.1001");
-	m_lvwFileInfo.SetItemText(nRow, 3, L"364640");
-	m_lvwFileInfo.SetItemText(nRow, 4, L"2018-07-23 16:30:22");
-	m_lvwFileInfo.SetItemText(nRow, 5, L"是");
-	m_lvwFileInfo.SetItemText(nRow, 6, L"baseclient\\360BAEClient.exe;baseclient\\360BAEClient.exe");
-
-	nRow = m_lvwFileInfo.InsertItem(1, L"11360BAEClient.exe");
-	//设置数据
-	m_lvwFileInfo.SetItemText(nRow, 1, L"BBF2456792346563FGHSGSHERH");
-	m_lvwFileInfo.SetItemText(nRow, 2, L"6.3.0.1001");
-	m_lvwFileInfo.SetItemText(nRow, 3, L"364640");
-	m_lvwFileInfo.SetItemText(nRow, 4, L"2018-07-23 16:30:22");
-	m_lvwFileInfo.SetItemText(nRow, 5, L"是");
-	m_lvwFileInfo.SetItemText(nRow, 6, L"baseclient\\360BAEClient.exe;baseclient\\360BAEClient.exe");
-
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+
+void CFileInfoTabItem::InsertFileInfo(FILE_INFO *fileInfo)
+{
+    CString strSize;
+    strSize.Format(L"%d B", fileInfo->dwSize);
+
+    int nRow = m_lvwFileInfo.InsertItem(m_dwRow++, fileInfo->strFileName);
+    //设置数据
+    m_lvwFileInfo.SetItemText(nRow, 1, fileInfo->strMd5);
+    m_lvwFileInfo.SetItemText(nRow, 2, fileInfo->strVersion);
+    m_lvwFileInfo.SetItemText(nRow, 3, strSize);
+    m_lvwFileInfo.SetItemText(nRow, 4, fileInfo->strSignTime);
+    m_lvwFileInfo.SetItemText(nRow, 5, fileInfo->fUpdate?L"是":L"否");
+    m_lvwFileInfo.SetItemText(nRow, 6, fileInfo->strFileLocation);
 }
 
 /////////////////////////////////////////“文件信息”输出框////////////////////////////////////////////////////

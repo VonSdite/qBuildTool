@@ -1,6 +1,8 @@
 #pragma once
 #include "stdafx.h"
+
 #define RECVPACK_SIZE 2048
+
 
 class CFunction
 {

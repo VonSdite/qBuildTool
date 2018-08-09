@@ -11,7 +11,7 @@ class CLogTabItem : public CDialog
 public:
 	CLogTabItem(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CLogTabItem();
-	void Update(CString strVal);
+    void ShowLogInfo(CString strUrl, BOOL fSuccess);
 
 // Dialog Data
 	enum { IDD = IDD_LOG };
@@ -22,6 +22,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	CString m_tbLog;
-	CEdit m_cbEditLog;
+
+private:
+    CString m_strLog;
+    CEdit m_cbEditLog;
 };

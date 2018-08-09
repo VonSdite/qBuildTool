@@ -12,7 +12,7 @@ IMPLEMENT_DYNAMIC(CLogTabItem, CDialog)
 
 CLogTabItem::CLogTabItem(CWnd* pParent /*=NULL*/)
 	: CDialog(CLogTabItem::IDD, pParent)
-	, m_tbLog(_T(""))
+	, m_strLog(_T(""))
 {
 
 }
@@ -24,14 +24,8 @@ CLogTabItem::~CLogTabItem()
 void CLogTabItem::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_EDIT_LOG, m_tbLog);
+	DDX_Text(pDX, IDC_EDIT_LOG, m_strLog);
 	DDX_Control(pDX, IDC_EDIT_LOG, m_cbEditLog);
-}
-
-void CLogTabItem::Update(CString strVal)
-{
-	m_tbLog = strVal;
-	UpdateData(TRUE);
 }
 
 BEGIN_MESSAGE_MAP(CLogTabItem, CDialog)
@@ -40,7 +34,6 @@ END_MESSAGE_MAP()
 
 
 // CLogTab message handlers
-
 HBRUSH CLogTabItem::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CreateSolidBrush(RGB(255,255,255));
@@ -49,4 +42,18 @@ HBRUSH CLogTabItem::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 	// TODO:  Return a different brush if the default is not desired
 	return hbr;
+}
+
+void CLogTabItem::ShowLogInfo(CString strUrl, BOOL fSuccess)
+{
+    if (fSuccess)
+    {
+        m_strLog += strUrl + L" --> 下载成功\r\n";
+        UpdateData(FALSE);
+    }
+    else 
+    {
+        m_strLog += strUrl + L" --> 下载失败\r\n";
+        UpdateData(FALSE);
+    }
 }

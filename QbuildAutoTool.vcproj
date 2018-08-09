@@ -196,11 +196,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\JsonHelper.cpp"
+				RelativePath=".\Function.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Function.cpp"
+				RelativePath=".\JsonHelper.cpp"
 				>
 			</File>
 			<File

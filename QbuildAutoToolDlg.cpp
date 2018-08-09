@@ -68,11 +68,12 @@ BEGIN_MESSAGE_MAP(CQbuildAutoToolDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_BROWSE, &CQbuildAutoToolDlg::OnBnClickedBrowse)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB2, &CQbuildAutoToolDlg::OnTcnSelchangeTab2)
     ON_MESSAGE(WM_SUCCESS_DOWNLOAD, &CQbuildAutoToolDlg::OnSuccessDownloadFile)
+    ON_MESSAGE(WM_COMPLETE_DOWNLOAD, &CQbuildAutoToolDlg::OnLogDownloadStatus)
+    ON_MESSAGE(WM_SHOW_FILE_INFO, &CQbuildAutoToolDlg::OnShowFileInfo)
 ON_EN_KILLFOCUS(IDC_EDIT_GIT_PATH, &CQbuildAutoToolDlg::OnEnKillfocusEditGitPath)
 ON_EN_CHANGE(IDC_EDIT_GIT_PATH, &CQbuildAutoToolDlg::OnEnChangeEditGitPath)
 ON_CBN_SELCHANGE(IDC_COMBO_BRANCH, &CQbuildAutoToolDlg::OnCbnSelchangeComboBranch)
 END_MESSAGE_MAP()
-
 
 // CQbuildAutoToolDlg message handlers
 BOOL CQbuildAutoToolDlg::OnInitDialog()
@@ -393,6 +394,15 @@ void CQbuildAutoToolDlg::OnBnClickedGetFile()
 	}
 }
 
+LRESULT CQbuildAutoToolDlg::OnLogDownloadStatus(WPARAM wParam, LPARAM lParam)
+{
+    CString *strUrl = (CString *)wParam;
+    m_tabItemLog.ShowLogInfo(*strUrl, lParam);
+
+    delete strUrl;
+    return TRUE;
+}
+
 LRESULT CQbuildAutoToolDlg::OnSuccessDownloadFile(WPARAM wParam, LPARAM lParam)
 {
     CString *pstrFileName = (CString *)wParam;
@@ -400,6 +410,15 @@ LRESULT CQbuildAutoToolDlg::OnSuccessDownloadFile(WPARAM wParam, LPARAM lParam)
     pTask = new CUnzipTask(this->GetSafeHwnd(), *pstrFileName);
     m_thrdpoolParse.QueueRequest((CParseWorker::RequestType) pTask);
     delete pstrFileName;
+    return TRUE;
+}
+
+LRESULT CQbuildAutoToolDlg::OnShowFileInfo(WPARAM wParam, LPARAM lParam)
+{
+    FILE_INFO *fileInfo = (FILE_INFO *) wParam;
+    m_tabItemFileInfo.InsertFileInfo(fileInfo);
+
+    delete fileInfo;
     return TRUE;
 }
 
@@ -414,9 +433,6 @@ void CQbuildAutoToolDlg::OnBnClickedPushFile()
 		MessageBox(L"ÇëÊäÈë±¸×¢£¡");
 		return;
 	}
-
-	this->SendLogInfo(strNote);
-
 }
 
 
@@ -457,7 +473,3 @@ void CQbuildAutoToolDlg::OnEnChangeEditGitPath()
     isEditGitPathChange = TRUE;
 }
 
-void CQbuildAutoToolDlg::SendLogInfo(CString strLogInfo)
-{
-	m_tabItemLog.m_cbEditLog.SetWindowText(strLogInfo);
-}

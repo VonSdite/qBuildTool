@@ -1,6 +1,6 @@
 #pragma once
 #include "afxcmn.h"
-
+#include "CParseWorker.h"
 
 // CFileInfoTab dialog
 
@@ -30,5 +30,9 @@ public:
 	//afx_msg void OnSize(UINT nType, int cx, int cy);
 
 public:
+    void InsertFileInfo(FILE_INFO *fileInfo);
+
+private:
     CListCtrl m_lvwFileInfo;
+    DWORD m_dwRow;
 };
