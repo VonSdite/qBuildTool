@@ -2,6 +2,14 @@
 // Microsoft Visual C++ generated include file.
 // Used by QbuildAutoTool.rc
 //
+#define WM_FILE_INFO_UPADTE             (WM_USER+1)
+#define WM_SUCCESS_DOWNLOAD             (WM_USER+2)
+#define WM_COMPLETE_DOWNLOAD            (WM_USER+4)
+#define WM_SHOW_FILE_INFO               (WM_USER+5)
+#define WM_COPY                         (WM_USER+6)
+
+
+
 #define IDM_ABOUTBOX                    0x0010
 #define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
@@ -9,7 +17,7 @@
 #define IDR_MAINFRAME                   128
 #define IDR_MENU_COPY                   130
 #define IDD_FILE_INFO                   131
-#define IDD_LOG                        132
+#define IDD_LOG                         132
 #define IDC_EDIT1                       1000
 #define IDC_EDIT_GIT_PATH               1000
 #define IDC_EDIT_LOG                    1000
@@ -24,13 +32,14 @@
 #define IDC_BUTTON_PUSH_FILE            1032
 #define IDC_BUTTON_EXIT                 1033
 #define IDC_COMBO_BRANCH                1034
-#define IDC_TAB2                        1036
+#define IDC_TAB_INFO                    1036
 #define IDC_STATIC3                     10033
 #define IDC_STATIC1                     10034
 #define IDC_STATIC2                     10035
 #define ID_32771                        32771
 #define ID_32772                        32772
-#define ID_Menu1                        32773
+#define ID_MENU1                        32773
+
 
 // Next default values for new objects
 // 

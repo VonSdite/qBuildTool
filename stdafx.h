@@ -22,10 +22,7 @@
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
 
-
 #include <afxdisp.h>        // MFC Automation classes
-
-
 
 #ifndef _AFX_NO_OLE_SUPPORT
 #include <afxdtctl.h>           // MFC support for Internet Explorer 4 Common Controls
@@ -36,18 +33,35 @@
 
 #include <afxcontrolbars.h>     // MFC support for ribbons and control bars
 
+#include <map>
 #include <set>
 #include <afx.h>
 #include <afxinet.h>
 #include <fstream>
+#include <string>
+#include <atlutil.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+#include <Softpub.h>
+#include <wintrust.h>
 
+#pragma comment(lib, "Crypt32.lib")
+#pragma comment(lib, "Wintrust.lib")
+#pragma comment(lib,"version.lib")
+
+
+#define ZLIB_WINAPI
 #include "zlib/unzip.h"
 #pragma comment(lib, "zlib/zlibwapi.lib") 
 
-#include "JsonHelper.h"
+
+#include "json/json.h"
 #pragma comment(lib, "json/json.lib")
 
 #include "Function.h"
+
+
 
 
 #ifdef _UNICODE

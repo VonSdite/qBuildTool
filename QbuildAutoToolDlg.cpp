@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "QbuildAutoTool.h"
 #include "QbuildAutoToolDlg.h"
+#include "JsonHelper.h"
+#include "Resource.h"
 
 
 #ifdef _DEBUG
@@ -42,19 +44,43 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 END_MESSAGE_MAP()
 
 #define THREADPOOL_SIZE 5
-// CQbuildAutoToolDlg dialog
+
+// CQbuildAutoToolDlg dialog构造函数
 CQbuildAutoToolDlg::CQbuildAutoToolDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CQbuildAutoToolDlg::IDD, pParent), isEditGitPathChange(FALSE)
+	: CDialog(CQbuildAutoToolDlg::IDD, pParent), m_fEditGitPathChange(FALSE)
+    , m_strBranch(_T(""))
+    , m_strGitPath(_T(""))
+	, m_fIsStartGetFile(FALSE)
+	, m_fISStartGit(FALSE)
+	, m_fClear(FALSE)
+    , m_strNote(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
     m_thrdpoolParse.Initialize(NULL, THREADPOOL_SIZE);
+    m_jvRoot.clear();
+}
+
+// 析构函数
+CQbuildAutoToolDlg::~CQbuildAutoToolDlg()
+{
+	std::set<FILE_INFO *>::iterator iter = m_setFileInfo.begin(); 
+	for (; iter != m_setFileInfo.end();)
+	{
+		delete *iter;
+		m_setFileInfo.erase(iter++);
+	}
+	// 将临时文件夹删除
+	CFunction::RemoveDir(L"Temp");
 }
 
 void CQbuildAutoToolDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_COMBO_BRANCH, m_cmbBranch);
-	DDX_Control(pDX, IDC_TAB2, m_tabFileInfo);
+    CDialog::DoDataExchange(pDX);
+    DDX_Control(pDX, IDC_COMBO_BRANCH, m_cmbBranch);
+    DDX_Control(pDX, IDC_TAB_INFO, m_tabInfo);
+    DDX_CBString(pDX, IDC_COMBO_BRANCH, m_strBranch);
+    DDX_Text(pDX, IDC_EDIT_GIT_PATH, m_strGitPath);
+    DDX_Text(pDX, IDC_EDIT_NOTE, m_strNote);
 }
 
 BEGIN_MESSAGE_MAP(CQbuildAutoToolDlg, CDialog)
@@ -66,13 +92,16 @@ BEGIN_MESSAGE_MAP(CQbuildAutoToolDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_PUSH_FILE, &CQbuildAutoToolDlg::OnBnClickedPushFile)
 	ON_BN_CLICKED(IDC_BUTTON_GET_FILE, &CQbuildAutoToolDlg::OnBnClickedGetFile)
 	ON_BN_CLICKED(IDC_BUTTON_BROWSE, &CQbuildAutoToolDlg::OnBnClickedBrowse)
-	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB2, &CQbuildAutoToolDlg::OnTcnSelchangeTab2)
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_INFO, &CQbuildAutoToolDlg::OnTcnSelchangeTabInfo)
     ON_MESSAGE(WM_SUCCESS_DOWNLOAD, &CQbuildAutoToolDlg::OnSuccessDownloadFile)
     ON_MESSAGE(WM_COMPLETE_DOWNLOAD, &CQbuildAutoToolDlg::OnLogDownloadStatus)
+	ON_MESSAGE(WM_LOG_GIT_INFO, &CQbuildAutoToolDlg::OnLogGitInfo)
     ON_MESSAGE(WM_SHOW_FILE_INFO, &CQbuildAutoToolDlg::OnShowFileInfo)
 ON_EN_KILLFOCUS(IDC_EDIT_GIT_PATH, &CQbuildAutoToolDlg::OnEnKillfocusEditGitPath)
 ON_EN_CHANGE(IDC_EDIT_GIT_PATH, &CQbuildAutoToolDlg::OnEnChangeEditGitPath)
 ON_CBN_SELCHANGE(IDC_COMBO_BRANCH, &CQbuildAutoToolDlg::OnCbnSelchangeComboBranch)
+ON_EN_CHANGE(IDC_EDIT_URL_LIST, &CQbuildAutoToolDlg::OnEnChangeEditUrlList)
+ON_EN_CHANGE(IDC_EDIT_NOTE, &CQbuildAutoToolDlg::OnEnChangeEditNote)
 END_MESSAGE_MAP()
 
 // CQbuildAutoToolDlg message handlers
@@ -103,25 +132,25 @@ BOOL CQbuildAutoToolDlg::OnInitDialog()
 	// Set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
 	SetIcon(m_hIcon, FALSE);			// Set big icon
-	SetIcon(m_hIcon, TRUE);		// Set small icon
+	SetIcon(m_hIcon, TRUE);				// Set small icon
 
 
 	///////////////////////////////设置TabControl选项框/////////////////////
-	m_tabFileInfo.InsertItem(0, L"文件信息");
-	m_tabFileInfo.InsertItem(1, L"日志");
-	m_tabItemFileInfo.Create(IDD_FILE_INFO, &m_tabFileInfo);
-	m_tabItemLog.Create(IDD_LOG, &m_tabFileInfo);
+	m_tabInfo.InsertItem(0, L"文件信息");
+	m_tabInfo.InsertItem(1, L"日志");
+	m_tabItemFileInfo.Create(IDD_FILE_INFO, &m_tabInfo);
+	m_tabItemLog.Create(IDD_LOG, &m_tabInfo);
 
 	// 获取m_tab控件大小，并将m_tab控件的大小适当改小
 	CRect	rec;
-	m_tabFileInfo.GetClientRect(&rec);
-	rec.top += 20; // 去掉选项卡标签页那一块空间
+	m_tabInfo.GetClientRect(&rec);
+	// 去掉选项卡标签页那一块空间
+	rec.top += 20; 
 	rec.bottom -= 2;
 	rec.right -= 2;
-
 	m_tabItemFileInfo.SetWindowPos(NULL, rec.left, rec.top, rec.Width(), rec.Height(), SWP_SHOWWINDOW | SWP_NOSIZE);
 	m_tabItemLog.SetWindowPos(NULL, rec.left, rec.top, rec.Width(), rec.Height(), SWP_HIDEWINDOW);
-	m_tabFileInfo.SetCurSel(0);
+	m_tabInfo.SetCurSel(0);
 
 	return FALSE; 
 }
@@ -272,30 +301,33 @@ HCURSOR CQbuildAutoToolDlg::OnQueryDragIcon()
 
 
 /////////////////////////////////////////“本地git库存放路径”输入框////////////////////////////////////////////////////
-
-// “本地git库存放路径”输入框发生变化后执行该函数，用来判断该路径是否为git库文件以及获取该路径下的分支并添加到下拉框中
+// “本地git库存放路径”发生变化
+void CQbuildAutoToolDlg::OnEnChangeEditGitPath()
+{
+	m_fEditGitPathChange = TRUE;
+	m_fISStartGit = TRUE;
+}
+// 获取“本地git库存放路径”的分支并添加到下拉框中
 void CQbuildAutoToolDlg::OnEnKillfocusEditGitPath()
 {
-    // TODO: 在此添加控件通知处理程序代码
-
-    if (!isEditGitPathChange)
+    if (!m_fEditGitPathChange)
         return;
-    isEditGitPathChange = FALSE;
+    m_fEditGitPathChange = FALSE;
 
     //消除下拉框现有所有内容
     ((CComboBox*)GetDlgItem(IDC_COMBO_BRANCH))->ResetContent();
 
     // 判断文件夹是否为git库文件
-    CString strGitPath, strPath, strBranches;
-    GetDlgItemText(IDC_EDIT_GIT_PATH, strPath);
-    
-    strGitPath = strPath + L"\\.git";
+    CString strGitPath;
+	CString strBranches;
+	UpdateData(TRUE);
 
+    strGitPath = m_strGitPath + L"\\.git";
     // 该文件夹是git库文件
     if (PathFileExists(strGitPath))
     {
         // 执行命令行获得git仓库分支字符串
-		strBranches = CFunction::ExeCmd(TEXT("git branch"), strPath);
+		strBranches = CFunction::ExeCmd(TEXT("git branch"), m_strGitPath);
 
         // 获取默认分支
         CString strDefaultBranch = CFunction::GetDefaultBranch(strBranches);   
@@ -303,11 +335,11 @@ void CQbuildAutoToolDlg::OnEnKillfocusEditGitPath()
         // 以换行符分割字符串
         strBranches.Remove(L'*');
         strBranches.Remove(L' ');
-        std::set<CString> setCStrResult = CFunction::SplitCString(strBranches, L"\n");
+        std::set<CString> setStrResult = CFunction::SplitCString(strBranches, L"\n");
 
         //将分支消息添加下拉框内容
-        std::set<CString>::iterator iter = setCStrResult.begin();
-        std::set<CString>::iterator iterEnd = setCStrResult.end();
+        std::set<CString>::iterator iter	= setStrResult.begin();
+        std::set<CString>::iterator iterEnd = setStrResult.end();
         for(; iter != iterEnd; iter++)
         {
             ((CComboBox*)GetDlgItem(IDC_COMBO_BRANCH))->AddString(*iter);
@@ -320,15 +352,13 @@ void CQbuildAutoToolDlg::OnEnKillfocusEditGitPath()
     {
         SetDlgItemText(IDC_EDIT_GIT_PATH, L"");
         MessageBox(L"该路径不是Git仓库", L"警告", MB_OK);
-        return;
     }
 }
-
 
 // 点击“浏览”按钮，实现浏览文件功能获取文件目录路径
 void CQbuildAutoToolDlg::OnBnClickedBrowse()
 {
-	LPWSTR szPath=NULL;     //存放选择的目录路径 
+	LPWSTR	szPath;     
     CString str;
  
 	szPath = (LPWSTR)malloc(1024);
@@ -348,7 +378,7 @@ void CQbuildAutoToolDlg::OnBnClickedBrowse()
  
     if(lp && SHGetPathFromIDList(lp, szPath))   
     {
-		SetDlgItemText(IDC_EDIT_GIT_PATH,szPath);     
+	    SetDlgItemText(IDC_EDIT_GIT_PATH, szPath);     
         OnEnKillfocusEditGitPath();
     }
 }
@@ -358,29 +388,84 @@ void CQbuildAutoToolDlg::OnBnClickedBrowse()
 // 点击下拉框的某项触发该函数（实现点击某个分支将该分支拉下来）
 void CQbuildAutoToolDlg::OnCbnSelchangeComboBranch()
 {
-	CString strSelectedBranch;
+    UpdateData(TRUE);
 	CString szCmdLine;
-	CString szGitPath;
-	CString szResult;
-	GetDlgItemText(IDC_COMBO_BRANCH,strSelectedBranch);
-	szCmdLine = L"git checkout " + strSelectedBranch ;
-	GetDlgItemText(IDC_EDIT_GIT_PATH,szGitPath);
-	szResult = CFunction::ExeCmd(szCmdLine, szGitPath);
-	//MessageBox(szResult);
+	szCmdLine = L"git checkout " + m_strBranch ;
+	CFunction::ExeCmd(szCmdLine, m_strGitPath);
+	m_fISStartGit = TRUE;
+}
+
+/////////////////////////////////////////备注输入框////////////////////////////////////////////////////
+void CQbuildAutoToolDlg::OnEnChangeEditNote()
+{
+	// 更新备注变量的值
+	UpdateData(TRUE);
+}
+
+/////////////////////////////////////////“提测文件列表”输入框////////////////////////////////////////////////
+// 该输入框发生变化
+void CQbuildAutoToolDlg::OnEnChangeEditUrlList()
+{
+	// 解决多次点击“获取文件”按钮崩溃问题
+	m_fIsStartGetFile				= FALSE;
+	m_fISStartGit					= TRUE;
+	m_fClear						= TRUE;
+	m_tabItemLog.m_fFirstLogGitInfo = TRUE;
+	m_tabItemLog.m_fFirstLogUrlInfo = TRUE;
+}
+// 实现“提测文件列表”全选功能
+BOOL CQbuildAutoToolDlg::PreTranslateMessage(MSG* pMsg)
+{
+	if(pMsg->message == WM_KEYDOWN)
+	{
+		BOOL b = GetKeyState(VK_CONTROL) & 0X80;
+		if(b && (pMsg->wParam == L'a' || pMsg->wParam == L'A'))
+		{
+			SendDlgItemMessage(IDC_EDIT_URL_LIST, EM_SETSEL, 0, -1);
+			return TRUE;
+		}
+	}
+   
+	return CWnd::PreTranslateMessage(pMsg);
 }
 
 /////////////////////////////////////////“获取文件”按钮////////////////////////////////////////////////////
-#include <utility>
 void CQbuildAutoToolDlg::OnBnClickedGetFile()
 {
+	// 判断是否存在JSON文件
+    if (!GetFileLocationFromJson())
+    {
+        return ;
+    }
+
+	// 判断是否需要清空“文件消息”框
+	if (m_fClear)
+	{
+		m_fClear = FALSE;
+		m_tabItemFileInfo.m_lvwFileInfo.DeleteAllItems();
+		m_tabItemLog.m_strLog.Empty();
+	}
+
+	// 判断是否已经开始获取文件
+	if (m_fIsStartGetFile)
+		return ;
+	m_fIsStartGetFile = TRUE;
+
+    // 必须设置git仓库路径后才允许获取文件
+    if (m_strGitPath.IsEmpty())
+    {
+        MessageBox(L"请设置Git仓库路径", L"警告", MB_OK | MB_ICONERROR); 
+        return;
+    }
+
 	// 获取edict控件消息
 	CString strUrls;
 	GetDlgItemText(IDC_EDIT_URL_LIST, strUrls);
 
 	// 分割得到url集合
-    std::set<CString> strEachUrl = CFunction::SplitCString(strUrls, L"\r\n");
-	std::set<CString>::iterator iterUrl = strEachUrl.begin();
-	std::set<CString>::iterator iterUrlEnd = strEachUrl.end();
+    std::set<CString>			strEachUrl	= CFunction::SplitCString(strUrls, L"\r\n");
+	std::set<CString>::iterator iterUrl		= strEachUrl.begin();
+	std::set<CString>::iterator iterUrlEnd	= strEachUrl.end();
 
 	// 在当前运行环境新建一个临时文件夹
     CString strSavePath = L"Temp\\";
@@ -394,60 +479,13 @@ void CQbuildAutoToolDlg::OnBnClickedGetFile()
 	}
 }
 
-LRESULT CQbuildAutoToolDlg::OnLogDownloadStatus(WPARAM wParam, LPARAM lParam)
-{
-    CString *strUrl = (CString *)wParam;
-    m_tabItemLog.ShowLogInfo(*strUrl, lParam);
-
-    delete strUrl;
-    return TRUE;
-}
-
-LRESULT CQbuildAutoToolDlg::OnSuccessDownloadFile(WPARAM wParam, LPARAM lParam)
-{
-    CString *pstrFileName = (CString *)wParam;
-    CTaskBase *pTask = NULL;
-    pTask = new CUnzipTask(this->GetSafeHwnd(), *pstrFileName);
-    m_thrdpoolParse.QueueRequest((CParseWorker::RequestType) pTask);
-    delete pstrFileName;
-    return TRUE;
-}
-
-LRESULT CQbuildAutoToolDlg::OnShowFileInfo(WPARAM wParam, LPARAM lParam)
-{
-    FILE_INFO *fileInfo = (FILE_INFO *) wParam;
-    m_tabItemFileInfo.InsertFileInfo(fileInfo);
-
-    delete fileInfo;
-    return TRUE;
-}
-
-/////////////////////////////////////////“文件入库”按钮////////////////////////////////////////////////////
-void CQbuildAutoToolDlg::OnBnClickedPushFile()
-{
-	// 判断备注是否为空
-	CString strNote;
-	GetDlgItemText(IDC_EDIT_NOTE, strNote);
-	if (strNote.IsEmpty())
-	{
-		MessageBox(L"请输入备注！");
-		return;
-	}
-}
-
-
-/////////////////////////////////////////“退出”按钮////////////////////////////////////////////////////
-void CQbuildAutoToolDlg::OnBnClickedExit()
-{
-	EndDialog(IDCLOSE);
-}
-
-// 点击选项卡
-void CQbuildAutoToolDlg::OnTcnSelchangeTab2(NMHDR *pNMHDR, LRESULT *pResult)
+/**************************************显示相关信息到窗口********************************************/
+// 切换选项卡
+void CQbuildAutoToolDlg::OnTcnSelchangeTabInfo(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	*pResult = 0;
 	int nCurSel;
-	nCurSel = m_tabFileInfo.GetCurSel();
+	nCurSel = m_tabInfo.GetCurSel();
 	switch(nCurSel)
 	{
 	case 0:
@@ -462,14 +500,102 @@ void CQbuildAutoToolDlg::OnTcnSelchangeTab2(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 }
 
-void CQbuildAutoToolDlg::OnEnChangeEditGitPath()
+// 将下载状态输出到日志窗口
+LRESULT CQbuildAutoToolDlg::OnLogDownloadStatus(WPARAM wParam, LPARAM lParam)
 {
-    // TODO:  如果该控件是 RICHEDIT 控件，它将不
-    // 发送此通知，除非重写 CDialog::OnInitDialog()
-    // 函数并调用 CRichEditCtrl().SetEventMask()，
-    // 同时将 ENM_CHANGE 标志“或”运算到掩码中。
+    CString *strUrl = (CString *)wParam;
+    m_tabItemLog.ShowLogUrlInfo(*strUrl, lParam);
 
-    // TODO:  在此添加控件通知处理程序代码
-    isEditGitPathChange = TRUE;
+    delete strUrl;
+    return TRUE;
 }
+
+// 成功下载文件后执行解压操作
+LRESULT CQbuildAutoToolDlg::OnSuccessDownloadFile(WPARAM wParam, LPARAM lParam)
+{
+    CString		*pstrFileName;
+    CTaskBase	*pTask;
+
+	pstrFileName  = (CString *)wParam;
+    pTask		  = new CUnzipTask(this->GetSafeHwnd(), *pstrFileName, m_strBranch, m_jvRoot);
+    m_thrdpoolParse.QueueRequest((CParseWorker::RequestType) pTask);
+
+    delete pstrFileName;
+    return TRUE;
+}
+
+// 显示FILE_INFO结构体信息到“文件信息”输出框
+LRESULT CQbuildAutoToolDlg::OnShowFileInfo(WPARAM wParam, LPARAM lParam)
+{
+    FILE_INFO *fileInfo = (FILE_INFO *) wParam;
+    m_tabItemFileInfo.InsertFileInfo(fileInfo);
+
+    m_setFileInfo.insert(fileInfo); 
+    return TRUE;
+}
+
+// 从JSON文件读取文件配置信息
+BOOL CQbuildAutoToolDlg::GetFileLocationFromJson()
+{
+	CString strJsonPath = m_strGitPath + L"\\config.json";
+	if (PathFileExists(strJsonPath))
+	{
+		if (m_jvRoot.empty())
+			CJsonHelper::LoadJson((LPCTSTR)strJsonPath, m_jvRoot);
+		return TRUE;
+	}
+	else 
+	{
+		MessageBox(L"Git仓库目录下不存在配置文件config.json, 请先设置配置文件", L"警告", MB_OK | MB_ICONERROR);
+		return FALSE;
+	}
+}
+
+// 将git执行结果显示到日志窗口
+LRESULT CQbuildAutoToolDlg::OnLogGitInfo(WPARAM wParam, LPARAM)
+{
+	CString *strGitResult = (CString *)wParam;
+	m_tabItemLog.ShowLogGitInfo(*strGitResult);
+
+	delete strGitResult;
+	return TRUE;
+}
+
+/////////////////////////////////////////“文件入库”按钮////////////////////////////////////////////////////
+void CQbuildAutoToolDlg::OnBnClickedPushFile()
+{
+    if (!GetFileLocationFromJson())
+    {
+        return ;
+    }
+
+	// 判断备注是否为空
+	if (m_strNote.IsEmpty())
+	{
+		MessageBox(L"请输入备注！", L"警告", MB_ICONWARNING);
+		return;
+	}
+
+	if (!m_fISStartGit)
+	{
+		return;
+	}
+	m_fISStartGit = FALSE;
+
+    CTaskBase *pTask = new CPushTask(this->GetSafeHwnd(), m_jvRoot, m_setFileInfo, m_strGitPath, m_strBranch, m_strNote);
+    m_thrdpoolParse.QueueRequest((CParseWorker::RequestType) pTask);
+}
+
+
+/////////////////////////////////////////“退出”按钮////////////////////////////////////////////////////
+void CQbuildAutoToolDlg::OnBnClickedExit()
+{
+	EndDialog(IDCLOSE);
+}
+
+
+
+
+
+
 

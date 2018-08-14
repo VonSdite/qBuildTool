@@ -1,5 +1,4 @@
 #pragma once
-#include "afxcmn.h"
 #include "CParseWorker.h"
 
 // CFileInfoTab dialog
@@ -9,7 +8,7 @@ class CFileInfoTabItem : public CDialog
 	DECLARE_DYNAMIC(CFileInfoTabItem)
 
 public:
-	CFileInfoTabItem(CWnd* pParent = NULL);   // standard constructor
+	CFileInfoTabItem(CWnd* pParent = NULL);             // standard constructor
 	virtual ~CFileInfoTabItem();
 
 // Dialog Data
@@ -24,15 +23,20 @@ public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnRclickList2(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnCopyMenu();
+    afx_msg HRESULT OnCopy(WPARAM, LPARAM);
     virtual BOOL OnInitDialog();
+    void InsertFileInfo(FILE_INFO *fileInfo);
 
     // 对话框最大化
 	//afx_msg void OnSize(UINT nType, int cx, int cy);
 
-public:
-    void InsertFileInfo(FILE_INFO *fileInfo);
+	CListCtrl   m_lvwFileInfo;
 
 private:
-    CListCtrl m_lvwFileInfo;
-    DWORD m_dwRow;
+    DWORD       m_dwRow;
+    HACCEL      m_hAcc;
+    BOOL        m_fLButtonDown;
+public:
+    virtual BOOL PreTranslateMessage(MSG* pMsg);
+    afx_msg void OnLvnHotTrackList2(NMHDR *pNMHDR, LRESULT *pResult);
 };

@@ -1,11 +1,6 @@
 #pragma once
 
-#include <atlutil.h>
-
-#define WM_FILE_INFO_UPADTE     (WM_USER+1)
-#define WM_SUCCESS_DOWNLOAD     (WM_USER+2)
-#define WM_COMPLETE_DOWNLOAD    (WM_USER+4)
-#define WM_SHOW_FILE_INFO       (WM_USER+5)
+#include "resource.h"
 
 class CTaskBase;
 class CDownloadTask;
@@ -26,8 +21,8 @@ public:
     virtual BOOL GetWorkerData(DWORD /*dwParam*/, void ** /*ppvData*/);
 
 protected:
-    DWORD	m_dwExecs;
-    LONG	m_lId;
+    DWORD	    m_dwExecs;
+    LONG	    m_lId;
 }; // CParseWorker
 
 class CTaskBase
@@ -43,22 +38,25 @@ public:
 
     void DoTask(void *pvParam, OVERLAPPED *pOverlapped);
 
-    CString m_strUrl;
 private:
-    CString m_strSavePath;
-    HWND m_hWnd;
+    CString     m_strSavePath;
+    HWND        m_hWnd;
+    CString     m_strUrl;
+
 };
 
 class CUnzipTask : public CTaskBase
 {
 public:
-    CUnzipTask(HWND hWnd, CString strFilePath);
+    CUnzipTask(HWND hWnd, CString strFilePath, const CString strBranch, const Json::Value &jvRoot);
 
     void DoTask(void *pvParam, OVERLAPPED *pOverlapped);
 
 private:
-    CString m_strFilePath;
-    HWND m_hWnd;
+    CString         m_strFilePath;
+    HWND            m_hWnd;
+    CString         m_strBranch;
+    Json::Value     m_jvRoot;
 };
 
 struct FILE_INFO
@@ -70,4 +68,18 @@ struct FILE_INFO
     CString         strSignTime;
     BOOL            fUpdate;
     CString         strFileLocation;
+};
+
+class CPushTask : public CTaskBase
+{
+public:
+    CPushTask(HWND hWnd, const Json::Value &jvRoot, const std::set<FILE_INFO *> &setFileInfo, const CString &strGitPath, const CString &strBranch, const CString &strNote);
+    void DoTask(void *pvParam, OVERLAPPED *pOverlapped);
+private:
+	HWND					m_hWnd;
+    Json::Value				m_jvRoot;
+    std::set<FILE_INFO *>	m_setFileInfo;
+    CString					m_strBranch;
+    CString					m_strGitPath;
+    CString					m_strNote;
 };

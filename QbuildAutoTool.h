@@ -10,7 +10,6 @@
 
 #include "resource.h"		// main symbols
 
-
 // CQbuildAutoToolApp:
 // See QbuildAutoTool.cpp for the implementation of this class
 //
