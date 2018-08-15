@@ -1,6 +1,6 @@
 #pragma once
 
-#include "resource.h"
+#include "MyMacro.h"
 
 class CTaskBase;
 class CDownloadTask;
@@ -34,29 +34,15 @@ public:
 class CDownloadTask : public CTaskBase
 {
 public:
-    CDownloadTask(HWND hWnd, CString url, CString strSavePath);
+    CDownloadTask(HWND hWnd, std::set<CString> urls);
 
     void DoTask(void *pvParam, OVERLAPPED *pOverlapped);
 
 private:
-    CString     m_strSavePath;
-    HWND        m_hWnd;
-    CString     m_strUrl;
-
-};
-
-class CUnzipTask : public CTaskBase
-{
-public:
-    CUnzipTask(HWND hWnd, CString strFilePath, const CString strBranch, const Json::Value &jvRoot);
-
-    void DoTask(void *pvParam, OVERLAPPED *pOverlapped);
-
-private:
-    CString         m_strFilePath;
-    HWND            m_hWnd;
-    CString         m_strBranch;
-    Json::Value     m_jvRoot;
+    HWND                  m_hWnd;
+    std::set<CString>     m_strUrls;
+    
+    CString               DownloadSaveFile(CString url);		
 };
 
 struct FILE_INFO
@@ -70,6 +56,32 @@ struct FILE_INFO
     CString         strFileLocation;
 };
 
+class CUnzipTask : public CTaskBase
+{
+public:
+    CUnzipTask(HWND hWnd, CString strFilePath, const CString strGitPath, const CString strBranch, const Json::Value &jvRoot);
+
+    void DoTask(void *pvParam, OVERLAPPED *pOverlapped);
+
+private:
+    CString         m_strFilePath;
+    HWND            m_hWnd;
+    CString         m_strBranch;
+    CString         m_strGitPath;
+    Json::Value     m_jvRoot;
+
+    std::set<CString>  unzip(CString strSaveFile);  
+    void               GetFileInfo(CString strFileName, FILE_INFO &fileInfo);
+    void               GetFileName(const CString &strFilePath, CString &strFileName);
+    void               GetSignDateTime(const CString &strFilePath, CString &strSignDate);
+    void               GetFileSizeAndMd5(LPCWSTR FileDirectory, DWORD &dwFileSize, CString &strMd5);
+    bool               QueryValue(const CString& ValueName, const CString& strFilePath, CString& RetStr);
+    void               GetFileVersion(const CString& strFilePath, CString& strFileVersion);
+    void               GetFileLocation(CString strFilePath, CString &strFileLocation);
+};
+
+
+
 class CPushTask : public CTaskBase
 {
 public:
@@ -82,4 +94,7 @@ private:
     CString					m_strBranch;
     CString					m_strGitPath;
     CString					m_strNote;
+
+    void DeleteFileByConfig();
+    void UpdateFileByConfig();
 };

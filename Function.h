@@ -1,6 +1,6 @@
 #pragma once
 
-#define RECVPACK_SIZE 2048
+#include "MyMacro.h"
 
 class CFunction
 {
@@ -14,6 +14,10 @@ public:
     
     // 分割CString字符串
     static std::set<CString>    SplitCString(CString strSrc, CString strGap);			
+    static std::vector<CString> SplitString(CString strSrc, CString strGap);
+
+    // 从url中获取下载的压缩包文件名
+    static CString GetNameFromUrl(CString strUrl);
 
     // 获取默认分支字符串
 	static CString			    GetDefaultBranch(CString strSrc);
@@ -26,4 +30,5 @@ public:
 
     // string转wstring
     static std::wstring         s2ws(const std::string& s);
+
 };

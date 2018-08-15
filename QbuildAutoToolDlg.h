@@ -6,11 +6,8 @@
 #include "FileInfoTabItem.h"
 #include "LogTabItem.h"
 #include "CParseWorker.h"
-
-#define WM_FILE_INFO_UPADTE     (WM_USER+1)
-#define WM_SUCCESS_DOWNLOAD     (WM_USER+2)
-#define WM_COMPLETE_DOWNLOAD    (WM_USER+4)
-#define WM_SHOW_FILE_INFO       (WM_USER+5)
+#include "MyMacro.h"
+#include "afxwin.h"
 
 // CQbuildAutoToolDlg dialog
 class CQbuildAutoToolDlg : public CDialog
@@ -48,10 +45,10 @@ public:
     afx_msg void        OnEnKillfocusEditGitPath();
     afx_msg void        OnEnChangeEditGitPath();
     afx_msg void        OnCbnSelchangeComboBranch();
-    afx_msg LRESULT     OnSuccessDownloadFile(WPARAM, LPARAM);
     afx_msg LRESULT     OnLogDownloadStatus(WPARAM, LPARAM);
     afx_msg LRESULT     OnShowFileInfo(WPARAM, LPARAM);
 	afx_msg LRESULT		OnLogGitInfo(WPARAM, LPARAM);
+    afx_msg LRESULT     OnDownLoadFinished(WPARAM, LPARAM);
 
     //// 对话框最大化
     //afx_msg void OnSize(UINT nType, int cx, int cy);
@@ -66,15 +63,20 @@ private:
     CLogTabItem			        m_tabItemLog;
     CThreadPool<CParseWorker>   m_thrdpoolParse;
     Json::Value                 m_jvRoot;
-    BOOL                        m_fEditGitPathChange;
-	BOOL						m_fIsStartGetFile;
-	BOOL						m_fISStartGit;
-	BOOL						m_fClear;
+    BOOL                        m_fIsEditGitPathChange;
+	BOOL						m_fEnableGitPush;
     std::set<FILE_INFO*>        m_setFileInfo;
 
     BOOL GetFileLocationFromJson();
+    void Clear();
 public:
 	afx_msg void OnEnChangeEditUrlList();
     afx_msg void OnEnChangeEditNote();
+
+	// 显示进度
+	void ShowProgress(const CString &strProgressStatus = L"");
 	CString m_strNote;
+	CButton m_btnPushFile;
+	CButton m_btnGetFile;
+	CString m_strUrls;
 };

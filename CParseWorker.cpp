@@ -2,45 +2,40 @@
 #include "CParseWorker.h"
 #include "Function.h"
 
-CString            DownloadSaveFile(CString url, CString strSavePath);		
-std::set<CString>  unzip(CString strSaveFile);  
-void               GetFileInfo(CString strFilePath, FILE_INFO &fileInfo, CString &strBranch, const Json::Value &jvRoot);
-void               GetFileName(const CString &strFilePath, CString &strFileName);
-void               GetSignDateTime(const CString &strFilePath, CString &strSignDate);
-void               GetFileSizeAndMd5(LPCWSTR FileDirectory, DWORD &dwFileSize, CString &strMd5);
-bool               QueryValue(const CString& ValueName, const CString& strFilePath, CString& RetStr);
-void               GetFileVersion(const CString& strFilePath, CString& strFileVersion);
-void               GetFileLocation(CString strFilePath, CString &strBranch, const Json::Value &jvRoot, CString &strFileLocation);
-void               DeleteFileByConfig(const Json::Value &jvRoot, CString strGitPath, CString strBranch);
-void               UpdateFileByConfig(std::set<FILE_INFO *>&setFileInfo, CString strGitPath, CString strBranch);
 
-CDownloadTask::CDownloadTask(HWND hWnd, CString strUrl, CString strSavePath) : m_hWnd(hWnd), m_strUrl(strUrl), m_strSavePath(strSavePath) 
+
+
+CDownloadTask::CDownloadTask(HWND hWnd, std::set<CString> urls) : m_hWnd(hWnd), m_strUrls(urls)
+{
+}
+
+CUnzipTask::CUnzipTask(HWND hWnd, CString strFilePath, const CString strGitPath, const CString strBranch, const Json::Value &jvRoot)
+: m_hWnd(hWnd), m_strFilePath(strFilePath), m_strBranch(strBranch), m_jvRoot(jvRoot), m_strGitPath(strGitPath)
 {
 }
 
 void CDownloadTask::DoTask(void *pvParam, OVERLAPPED *pOverlapped)
 {
-	
-	CString *strDownloadFileName; 
-	strDownloadFileName = new CString(DownloadSaveFile(m_strUrl, m_strSavePath));
-	// 下载成功
-	if (!strDownloadFileName->IsEmpty())
-	{
-		PostMessage(m_hWnd, WM_COMPLETE_DOWNLOAD, (WPARAM)new CString(m_strUrl), TRUE);
-		PostMessage(m_hWnd, WM_SUCCESS_DOWNLOAD, (WPARAM)strDownloadFileName, NULL);
-	}
-	// 下载失败
-	else 
-	{
-		PostMessage(m_hWnd, WM_COMPLETE_DOWNLOAD, (WPARAM)new CString(m_strUrl), FALSE);
-	}
+    std::set<CString>::iterator iterUrl		= m_strUrls.begin();
+    std::set<CString>::iterator iterUrlEnd	= m_strUrls.end();
 
-	
+    CString *strDownloadFileName; 
+    for (; iterUrl!= iterUrlEnd; iterUrl++)
+    {
+        strDownloadFileName = new CString(DownloadSaveFile(*iterUrl));
+        // 下载成功
+        if (!strDownloadFileName->IsEmpty())
+        {
+            PostMessage(m_hWnd, WM_COMPLETE_DOWNLOAD, (WPARAM)new CString(*iterUrl), TRUE);
+        }
+        else
+        {
+            PostMessage(m_hWnd, WM_COMPLETE_DOWNLOAD, (WPARAM)new CString(*iterUrl), FALSE);
+        }
+    }
+    PostMessage(m_hWnd, WM_DOWNLOAD_FINISHED, NULL, NULL);
 }
 
-CUnzipTask::CUnzipTask(HWND hWnd, CString strFilePath, const CString strBranch, const Json::Value &jvRoot) : m_hWnd(hWnd), m_strFilePath(strFilePath), m_strBranch(strBranch), m_jvRoot(jvRoot)
-{
-}
 
 void CUnzipTask::DoTask(void *pvParam, OVERLAPPED *pOverlapped)
 {
@@ -51,23 +46,17 @@ void CUnzipTask::DoTask(void *pvParam, OVERLAPPED *pOverlapped)
     for (; iterFile != iterFileEnd; ++iterFile)
     {
         FILE_INFO *fileInfo = new FILE_INFO;
-        GetFileInfo(*iterFile, *fileInfo, m_strBranch, m_jvRoot);
+        GetFileInfo(*iterFile, *fileInfo);
         PostMessage(m_hWnd, WM_SHOW_FILE_INFO, (WPARAM)fileInfo, NULL);
     }
 }
 
+
+
 //下载文件
-CString DownloadSaveFile(CString strUrl, CString strSavePath) 
+CString CDownloadTask::DownloadSaveFile(CString strUrl) 
 {
-    static BOOL isSetSeed = FALSE;
-    if (!isSetSeed)
-    {
-        srand((unsigned)time(NULL));
-        isSetSeed = TRUE;
-    }
-    CString strSaveFile;
-    strSaveFile.Format(L"%04x%04x%04x.zip", rand() % 0x10000, rand() % 0x10000, rand() % 0x10000);
-    strSaveFile = strSavePath + strSaveFile;
+    CString strSaveFile = CFunction::GetNameFromUrl(strUrl);
 
     bool ret=false;
     //CInternetSession Sess(TEXT("lpload"));
@@ -80,20 +69,29 @@ CString DownloadSaveFile(CString strUrl, CString strSavePath)
     Sess.SetOption(INTERNET_OPTION_DATA_RECEIVE_TIMEOUT, 2000); //2秒的接收超时
     DWORD dwFlag = INTERNET_FLAG_TRANSFER_BINARY|INTERNET_FLAG_DONT_CACHE|INTERNET_FLAG_RELOAD ;
 
-    CHttpFile* cFile   = NULL;
+    CHttpFile *cFile   = NULL;
     char      *pBuf    = NULL;
     int        nBufLen = 0   ;
+
     try{
         cFile = (CHttpFile*)Sess.OpenURL(strUrl, 1, dwFlag);
         DWORD dwStatusCode;
         cFile->QueryInfoStatusCode(dwStatusCode);
         if (dwStatusCode == HTTP_STATUS_OK) {
+            // 查询文件描述
+            CString strDescription;
+            cFile->QueryInfo(HTTP_QUERY_CONTENT_DESCRIPTION, strDescription);
+            if (strDescription!=L"File Transfer") return L"";
+
             //查询文件长度
             DWORD nLen = 0;
             cFile->QueryInfo(HTTP_QUERY_CONTENT_LENGTH, nLen);
+
             nBufLen = nLen;
             if (nLen <= 0) return L"";
 
+
+			
             //分配接收数据缓存
             pBuf = (char*)malloc(nLen+8);
             ZeroMemory(pBuf,nLen+8);
@@ -141,7 +139,7 @@ CString DownloadSaveFile(CString strUrl, CString strSavePath)
 }
 
 // 解压文件
-std::set<CString> unzip(CString strSaveFile)
+std::set<CString> CUnzipTask::unzip(CString strSaveFile)
 {
     std::set<CString> setFileName;
     unzFile zFile;
@@ -232,22 +230,22 @@ BOOL CParseWorker::GetWorkerData(DWORD /*dwParam*/, void ** /*ppvData*/)
 }
 
 
-void GetFileInfo(CString strFilePath, FILE_INFO &fileInfo, CString &strBranch, const Json::Value &jvRoot)
+void CUnzipTask::GetFileInfo(CString strFileName, FILE_INFO &fileInfo)
 {
     // 获取文件名字
-    GetFileName(strFilePath, fileInfo.strFileName);
+    GetFileName(strFileName, fileInfo.strFileName);
     
     // 获取文件大小和Md5
-    GetFileSizeAndMd5(strFilePath, fileInfo.dwSize, fileInfo.strMd5);
+    GetFileSizeAndMd5(strFileName, fileInfo.dwSize, fileInfo.strMd5);
     
     // 获取签名时间
-    GetSignDateTime(strFilePath, fileInfo.strSignTime);
+    GetSignDateTime(strFileName, fileInfo.strSignTime);
 
     // 获取文件版本号
-    GetFileVersion(strFilePath, fileInfo.strVersion);
+    GetFileVersion(strFileName, fileInfo.strVersion);
 
     // 根据json配置文件中获取文件存放位置
-    GetFileLocation(strFilePath, strBranch, jvRoot, fileInfo.strFileLocation);
+    GetFileLocation(strFileName,  fileInfo.strFileLocation);
 
     std::set<CString> location = CFunction::SplitCString(fileInfo.strFileLocation, L";");
     std::set<CString>::iterator it = location.begin();
@@ -258,7 +256,8 @@ void GetFileInfo(CString strFilePath, FILE_INFO &fileInfo, CString &strBranch, c
     {
         DWORD size;
         CString md5;
-        GetFileSizeAndMd5(*it, size, md5);
+        CString strFileName = m_strGitPath + L"\\" + *it + L"\\" + fileInfo.strFileName;
+        GetFileSizeAndMd5(strFileName, size, md5);
 
         if (md5.IsEmpty()) continue;
 
@@ -276,13 +275,13 @@ void GetFileInfo(CString strFilePath, FILE_INFO &fileInfo, CString &strBranch, c
 }
 
 // 获取文件名字
-void GetFileName(const CString &strFilePath, CString &strFileName)
+void CUnzipTask::GetFileName(const CString &strFilePath, CString &strFileName)
 {
 	strFileName = PathFindFileName((LPCTSTR)strFilePath);
 }
 
 // 获取文件大小和Md5
-void GetFileSizeAndMd5(LPCWSTR strFilePath, DWORD &dwFileSize, CString &strMd5)
+void CUnzipTask::GetFileSizeAndMd5(LPCWSTR strFilePath, DWORD &dwFileSize, CString &strMd5)
 {
 	HANDLE hFile = CreateFile(strFilePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 
@@ -365,7 +364,7 @@ void GetFileSizeAndMd5(LPCWSTR strFilePath, DWORD &dwFileSize, CString &strMd5)
 }
 
 // 获取签名时间
-void GetSignDateTime(const CString &strFilePath, CString &strSignDate)
+void CUnzipTask::GetSignDateTime(const CString &strFilePath, CString &strSignDate)
 {
 	GUID guidAction = WINTRUST_ACTION_GENERIC_VERIFY_V2;
 	WINTRUST_FILE_INFO sWintrustFileInfo;
@@ -433,7 +432,7 @@ void GetSignDateTime(const CString &strFilePath, CString &strSignDate)
 }
 
 // 获取文件版本号
-bool QueryValue(const CString& ValueName, const CString& szFileName, CString& RetStr)  
+bool CUnzipTask::QueryValue(const CString& ValueName, const CString& szFileName, CString& RetStr)  
 {  
     bool	bSuccess = FALSE;  
     BYTE	*m_lpVersionData = NULL;  
@@ -484,25 +483,25 @@ bool QueryValue(const CString& ValueName, const CString& szFileName, CString& Re
     return bSuccess;  
 }  
 
-void GetFileVersion(const CString& szFileName, CString& strFileVersion)
+void CUnzipTask::GetFileVersion(const CString& szFileName, CString& strFileVersion)
 {
     QueryValue(L"FileVersion", szFileName, strFileVersion);
 }
 
-void GetFileLocation(CString strFilePath, CString &strBranch,const Json::Value &jvRoot, CString &strFileLocation)
+void CUnzipTask::GetFileLocation(CString strFilePath, CString &strFileLocation)
 {
      std::string szBranch;
      std::string szFilePath;
      
      strFilePath = strFilePath.Right(strFilePath.GetLength() - strFilePath.ReverseFind(L'\\') - 1);
-     szBranch    = CT2A(strBranch.GetBuffer());
+     szBranch    = CT2A(m_strBranch.GetBuffer());
      szFilePath  = CT2A(strFilePath.GetBuffer());
 
      Json::Value arrFilePath;
-     arrFilePath = jvRoot["Repository"][szBranch][szFilePath];
+     arrFilePath = m_jvRoot["Repository"][szBranch][szFilePath];
 
      if (arrFilePath.size() == 0)
-        arrFilePath = jvRoot["Repository"]["Default"][szFilePath];
+        arrFilePath = m_jvRoot["Repository"]["Default"][szFilePath];
 
      std::string tmp;
      for (size_t i = 0; i < arrFilePath.size(); ++i)
@@ -516,18 +515,18 @@ void GetFileLocation(CString strFilePath, CString &strBranch,const Json::Value &
      strFileLocation = strFileLocationTmp;
 }
 
-void DeleteFileByConfig(const Json::Value &jvRoot, CString strGitPath, CString strBranch)
+void CPushTask::DeleteFileByConfig()
 {
     std::string szBranch;
     std::string szGitPath;
 	Json::Value arrFilePath;
 
-	szBranch    = CT2A(strBranch.GetBuffer());
-    szGitPath   = CT2A(strGitPath.GetBuffer());
-    arrFilePath = jvRoot["DeleteFile"][szBranch];
+	szBranch    = CT2A(m_strBranch.GetBuffer());
+    szGitPath   = CT2A(m_strGitPath.GetBuffer());
+    arrFilePath = m_jvRoot["DeleteFile"][szBranch];
 
     if (arrFilePath.size() == 0)
-        arrFilePath = jvRoot["DeleteFile"]["Default"];
+        arrFilePath = m_jvRoot["DeleteFile"]["Default"];
 
     Json::Value::Members		   mem = arrFilePath.getMemberNames();
     Json::Value::Members::iterator it  = mem.begin();
@@ -543,10 +542,10 @@ void DeleteFileByConfig(const Json::Value &jvRoot, CString strGitPath, CString s
     }
 }
 
-void UpdateFileByConfig(std::set<FILE_INFO *> &setFileInfo, CString strGitPath, CString strBranch)
+void CPushTask::UpdateFileByConfig()
 {
-    std::set<FILE_INFO*>::iterator iter		= setFileInfo.begin();
-    std::set<FILE_INFO*>::iterator iterEnd	= setFileInfo.end();
+    std::set<FILE_INFO*>::iterator iter		= m_setFileInfo.begin();
+    std::set<FILE_INFO*>::iterator iterEnd	= m_setFileInfo.end();
 
     for (; iter != iterEnd; ++iter)
     {
@@ -554,10 +553,10 @@ void UpdateFileByConfig(std::set<FILE_INFO *> &setFileInfo, CString strGitPath, 
         std::set<CString>::iterator it			= setFilePath.begin();
         for (; it != setFilePath.end(); ++it)
         {
-            CString strFullPath = strGitPath + L"\\" + (*it);
+            CString strFullPath = m_strGitPath + L"\\" + (*it);
             SHCreateDirectoryEx(NULL, strFullPath, NULL);
             strFullPath = strFullPath + L"\\" + (*iter)->strFileName;
-            CopyFile(L"Temp\\" + (*iter)->strFileName, strFullPath, FALSE);
+            CopyFile(SAVE_PATH + (*iter)->strFileName, strFullPath, FALSE);
         }
     }
 }
@@ -565,10 +564,10 @@ void UpdateFileByConfig(std::set<FILE_INFO *> &setFileInfo, CString strGitPath, 
 void CPushTask::DoTask(void *pvParam, OVERLAPPED *pOverlapped)
 {
     // 删除配置文件分支指定的文件或默认指定的文件
-    DeleteFileByConfig(m_jvRoot, m_strGitPath, m_strBranch);
+    DeleteFileByConfig();
 
     // 更新文件
-    UpdateFileByConfig(m_setFileInfo, m_strGitPath, m_strBranch);
+    UpdateFileByConfig();
 
     // git命令入库
 	CString  strLogGitResult;

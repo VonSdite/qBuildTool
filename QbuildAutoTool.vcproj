@@ -262,6 +262,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MyMacro.h"
+				>
+			</File>
+			<File
 				RelativePath=".\QbuildAutoTool.h"
 				>
 			</File>

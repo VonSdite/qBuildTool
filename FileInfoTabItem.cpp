@@ -10,7 +10,7 @@
 IMPLEMENT_DYNAMIC(CFileInfoTabItem, CDialog)
 
 CFileInfoTabItem::CFileInfoTabItem(CWnd* pParent /*=NULL*/)
-	: CDialog(CFileInfoTabItem::IDD, pParent), m_dwRow(0), m_fLButtonDown(FALSE)
+	: CDialog(CFileInfoTabItem::IDD, pParent), m_dwRow(0)
 {
 
 }
@@ -30,8 +30,9 @@ BEGIN_MESSAGE_MAP(CFileInfoTabItem, CDialog)
 	ON_WM_CTLCOLOR()
 	ON_NOTIFY(NM_RCLICK, IDC_LIST2, &CFileInfoTabItem::OnRclickList2)
 	ON_COMMAND(ID_MENU1, &CFileInfoTabItem::OnCopyMenu)
-    ON_MESSAGE(WM_COPY, &CFileInfoTabItem::OnCopy)
-    ON_NOTIFY(LVN_HOTTRACK, IDC_LIST2, &CFileInfoTabItem::OnLvnHotTrackList2)
+    ON_MESSAGE(WM_COPY_INFO, &CFileInfoTabItem::OnCopy)
+//    ON_NOTIFY(LVN_HOTTRACK, IDC_LIST2, &CFileInfoTabItem::OnLvnHotTrackList2)
+//ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_LIST2, &CFileInfoTabItem::OnNMReleasedcaptureList2)
 END_MESSAGE_MAP()
 
 
@@ -158,17 +159,9 @@ BOOL CFileInfoTabItem::PreTranslateMessage(MSG* pMsg)
         BOOL b = GetKeyState(VK_CONTROL) & 0X80;
         if(b && (pMsg->wParam == L'c' || pMsg->wParam == L'C'))
         {
-            SendMessage(WM_COPY, NULL, NULL);
+            SendMessage(WM_COPY_INFO, NULL, NULL);
             return TRUE;
         }
-    }
-    else if (pMsg->message == WM_LBUTTONDOWN)
-    {
-        m_fLButtonDown = TRUE;
-    }
-    else if (pMsg->message == WM_LBUTTONUP)
-    {
-        m_fLButtonDown = FALSE;
     }
 
     return CDialog::PreTranslateMessage(pMsg);
@@ -201,25 +194,25 @@ HRESULT CFileInfoTabItem::OnCopy(WPARAM wParam, LPARAM lParam)
 //	//}
 //}
 
-void CFileInfoTabItem::OnLvnHotTrackList2(NMHDR *pNMHDR, LRESULT *pResult)
-{
-    LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-    // TODO: 在此添加控件通知处理程序代码
-    *pResult = 0;
-
-    if (!m_fLButtonDown) return ;
-
-    DWORD dwPos = GetMessagePos();
-    CPoint point( LOWORD(dwPos), HIWORD(dwPos) );
-
-    m_lvwFileInfo.ScreenToClient(&point);
-
-    LVHITTESTINFO lvinfo;
-    lvinfo.pt = point;
-    lvinfo.flags = LVHT_ABOVE;
-
-    UINT nFlag;
-    int nItem = m_lvwFileInfo.HitTest(point, &nFlag);
-
-    m_lvwFileInfo.SetItemState(nItem, LVIS_SELECTED,  LVIS_SELECTED);
-}
+//void CFileInfoTabItem::OnLvnHotTrackList2(NMHDR *pNMHDR, LRESULT *pResult)
+//{
+//    //LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+//    //// TODO: 在此添加控件通知处理程序代码
+//    //*pResult = 0;
+//
+//    //if (!m_fLButtonDown) return ;
+//
+//    //DWORD dwPos = GetMessagePos();
+//    //CPoint point( LOWORD(dwPos), HIWORD(dwPos) );
+//
+//    //m_lvwFileInfo.ScreenToClient(&point);
+//
+//    //LVHITTESTINFO lvinfo;
+//    //lvinfo.pt = point;
+//    //lvinfo.flags = LVHT_ABOVE;
+//
+//    //UINT nFlag;
+//    //int nItem = m_lvwFileInfo.HitTest(point, &nFlag);
+//
+//    //m_lvwFileInfo.SetItemState(nItem, LVIS_SELECTED,  LVIS_SELECTED);
+//}

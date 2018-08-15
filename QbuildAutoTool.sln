@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "QbuildAutoTool", "QbuildAutoTool.vcproj", "{F32D5330-A9F3-4358-9BCC-481EE8113760}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AutoSignTool", "..\AutoSignTool\AutoSignTool\AutoSignTool.vcproj", "{AA647DC8-2E66-48D4-924D-F9CEBD320370}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +15,10 @@ Global
 		{F32D5330-A9F3-4358-9BCC-481EE8113760}.Debug|Win32.Build.0 = Debug|Win32
 		{F32D5330-A9F3-4358-9BCC-481EE8113760}.Release|Win32.ActiveCfg = Release|Win32
 		{F32D5330-A9F3-4358-9BCC-481EE8113760}.Release|Win32.Build.0 = Release|Win32
+		{AA647DC8-2E66-48D4-924D-F9CEBD320370}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AA647DC8-2E66-48D4-924D-F9CEBD320370}.Debug|Win32.Build.0 = Debug|Win32
+		{AA647DC8-2E66-48D4-924D-F9CEBD320370}.Release|Win32.ActiveCfg = Release|Win32
+		{AA647DC8-2E66-48D4-924D-F9CEBD320370}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

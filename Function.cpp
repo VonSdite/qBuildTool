@@ -150,3 +150,39 @@ std::wstring CFunction::s2ws(const std::string& s)
     setlocale(LC_ALL, "C");
     return result;
 }
+
+
+std::vector<CString> CFunction::SplitString(CString strSrc, CString strGap)
+{
+    std::vector<CString> strResult;
+    int nPos;
+
+    while ((nPos = strSrc.Find(strGap)) != -1)
+    {
+        CString tmp = strSrc.Left(nPos);
+        if (!tmp.IsEmpty()) 
+            strResult.push_back(tmp);
+        strSrc = strSrc.Right(strSrc.GetLength() - nPos - strGap.GetLength());
+    }
+
+    if (nPos == -1 && !strSrc.IsEmpty())
+        strResult.push_back(strSrc);
+    return strResult;
+}
+
+CString CFunction::GetNameFromUrl(CString strUrl)
+{
+    CString strTmpUrl = strUrl;
+    strTmpUrl.Remove(L'\\');
+    strTmpUrl.Remove(L'/');
+    strTmpUrl.Remove(L':');
+    strTmpUrl.Remove(L'.');
+    strTmpUrl.Remove(L'?');
+
+    std::vector<CString> vecSplitString = CFunction::SplitString(strTmpUrl, L"=");
+
+    CString strSaveFile = vecSplitString[vecSplitString.size() - 1] + L".zip";
+
+    strSaveFile = SAVE_PATH + strSaveFile;
+    return strSaveFile;
+}

@@ -3,6 +3,11 @@
 
 // CFileInfoTab dialog
 
+class Test : public CListCtrl
+{
+
+};
+
 class CFileInfoTabItem : public CDialog
 {
 	DECLARE_DYNAMIC(CFileInfoTabItem)
@@ -35,8 +40,6 @@ public:
 private:
     DWORD       m_dwRow;
     HACCEL      m_hAcc;
-    BOOL        m_fLButtonDown;
 public:
     virtual BOOL PreTranslateMessage(MSG* pMsg);
-    afx_msg void OnLvnHotTrackList2(NMHDR *pNMHDR, LRESULT *pResult);
 };
