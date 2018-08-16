@@ -16,7 +16,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// 非特定语言 resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -34,7 +34,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "About QbuildAutoTool"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,21,20
+    ICON            128,IDC_STATIC,14,14,21,20
     LTEXT           "QbuildAutoTool, Version 1.0",IDC_STATIC,42,14,114,8,SS_NOPREFIX
     LTEXT           "Copyright (C) 2018",IDC_STATIC,42,26,114,8
     DEFPUSHBUTTON   "OK",IDOK,113,41,50,14,WS_GROUP
@@ -59,12 +59,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // 非特定语言 resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (Default) resources
+// 非特定语言(默认值) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -86,7 +86,7 @@ BEGIN
     GROUPBOX        "Git相关信息",IDC_STATIC1,29,21,614,77
     LTEXT           "本地git库存放路径：",IDC_STATIC,60,38,73,8
     EDITTEXT        IDC_EDIT_GIT_PATH,135,36,426,13,ES_AUTOHSCROLL | ES_WANTRETURN
-    PUSHBUTTON      "浏览(&B)",IDC_BUTTON_BROWSE,578,35,50,14
+    PUSHBUTTON      "浏览(B)",IDC_BUTTON_BROWSE,571,36,50,14
     LTEXT           "分支名称：",IDC_STATIC,60,56,41,8
     COMBOBOX        IDC_COMBO_BRANCH,135,55,103,58,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "入库备注：",IDC_STATIC,60,73,41,8
@@ -94,9 +94,9 @@ BEGIN
     GROUPBOX        "提测文件列表",IDC_STATIC2,30,105,612,96
     EDITTEXT        IDC_EDIT_URL_LIST,45,121,580,73,ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN | WS_VSCROLL,WS_EX_CLIENTEDGE
     CONTROL         "",IDC_TAB_INFO,"SysTabControl32",0x0,31,212,613,143
-    PUSHBUTTON      "获取文件(&G)",IDC_BUTTON_GET_FILE,433,361,58,14,BS_CENTER
-    PUSHBUTTON      "文件入库(&C)",IDC_BUTTON_PUSH_FILE,507,361,50,14,BS_CENTER
-    PUSHBUTTON      "退出(&Q)",IDC_BUTTON_EXIT,572,361,50,14,BS_CENTER
+    PUSHBUTTON      "获取文件(G)",IDC_BUTTON_GET_FILE,411,358,61,14,BS_CENTER
+    PUSHBUTTON      "文件入库(P)",IDC_BUTTON_PUSH_FILE,490,358,61,14,BS_CENTER
+    PUSHBUTTON      "退出(Q)",IDC_BUTTON_EXIT,569,358,61,14,BS_CENTER
 END
 
 
@@ -129,12 +129,12 @@ BEGIN
     0x0000
 END
 
-#endif    // Neutral (Default) resources
+#endif    // 非特定语言(默认值) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Chinese (P.R.C.) resources
+// 中文(中华人民共和国) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
 #ifdef _WIN32
@@ -229,7 +229,15 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "res\\QbuildAutoTool.ico"
+IDI_ICON1               ICON                    "Icon\\mainlogo.ico"
+IDI_ICON2               ICON                    "Icon\\1.ico"
+IDI_ICON3               ICON                    "Icon\\2.ico"
+IDI_ICON4               ICON                    "Icon\\3.ico"
+IDI_ICON5               ICON                    "Icon\\4.ico"
+IDI_ICON6               ICON                    "Icon\\5.ico"
+IDI_ICON7               ICON                    "Icon\\6.ico"
+IDI_ICON8               ICON                    "Icon\\7.ico"
+IDI_ICON9               ICON                    "Icon\\8.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -244,12 +252,12 @@ BEGIN
     END
 END
 
-#endif    // Chinese (P.R.C.) resources
+#endif    // 中文(中华人民共和国) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// 英语(美国) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -263,8 +271,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
+ FILEVERSION 1,0,0,1001
+ PRODUCTVERSION 1,0,0,1001
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -306,7 +314,7 @@ BEGIN
     IDS_ABOUTBOX            "&About QbuildAutoTool..."
 END
 
-#endif    // English (U.S.) resources
+#endif    // 英语(美国) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

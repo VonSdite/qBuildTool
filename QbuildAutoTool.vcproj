@@ -127,7 +127,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -292,7 +292,39 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\res\QbuildAutoTool.ico"
+				RelativePath=".\Icon\1.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\Icon\2.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\Icon\3.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\Icon\4.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\Icon\5.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\Icon\6.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\Icon\7.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\Icon\8.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\Icon\mainlogo.ico"
 				>
 			</File>
 			<File
@@ -309,6 +341,70 @@
 			</File>
 			<File
 				RelativePath=".\res\QbuildAutoTool.rc2"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="json"
+			>
+			<File
+				RelativePath=".\json\autolink.h"
+				>
+			</File>
+			<File
+				RelativePath=".\json\config.h"
+				>
+			</File>
+			<File
+				RelativePath=".\json\features.h"
+				>
+			</File>
+			<File
+				RelativePath=".\json\forwards.h"
+				>
+			</File>
+			<File
+				RelativePath=".\json\json.h"
+				>
+			</File>
+			<File
+				RelativePath=".\json\json_batchallocator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\json\json_internalarray.inl"
+				>
+			</File>
+			<File
+				RelativePath=".\json\json_internalmap.inl"
+				>
+			</File>
+			<File
+				RelativePath=".\json\json_reader.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\json\json_value.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\json\json_valueiterator.inl"
+				>
+			</File>
+			<File
+				RelativePath=".\json\json_writer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\json\reader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\json\value.h"
+				>
+			</File>
+			<File
+				RelativePath=".\json\writer.h"
 				>
 			</File>
 		</Filter>

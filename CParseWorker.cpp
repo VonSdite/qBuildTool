@@ -2,15 +2,18 @@
 #include "CParseWorker.h"
 #include "Function.h"
 
-
-
-
-CDownloadTask::CDownloadTask(HWND hWnd, std::set<CString> urls) : m_hWnd(hWnd), m_strUrls(urls)
+CDownloadTask::CDownloadTask(HWND hWnd, std::set<CString> urls) 
+    : m_hWnd(hWnd)
+    , m_strUrls(urls)
 {
 }
 
 CUnzipTask::CUnzipTask(HWND hWnd, CString strFilePath, const CString strGitPath, const CString strBranch, const Json::Value &jvRoot)
-: m_hWnd(hWnd), m_strFilePath(strFilePath), m_strBranch(strBranch), m_jvRoot(jvRoot), m_strGitPath(strGitPath)
+    : m_hWnd(hWnd)
+    , m_strFilePath(strFilePath)
+    , m_strBranch(strBranch)
+    , m_jvRoot(jvRoot)
+    , m_strGitPath(strGitPath)
 {
 }
 
@@ -247,31 +250,8 @@ void CUnzipTask::GetFileInfo(CString strFileName, FILE_INFO &fileInfo)
     // 根据json配置文件中获取文件存放位置
     GetFileLocation(strFileName,  fileInfo.strFileLocation);
 
-    std::set<CString> location = CFunction::SplitCString(fileInfo.strFileLocation, L";");
-    std::set<CString>::iterator it = location.begin();
-    std::set<CString>::iterator itEnd = location.end();
-
-    fileInfo.fUpdate = TRUE;
-    for (; it != itEnd; ++it)
-    {
-        DWORD size;
-        CString md5;
-        CString strFileName = m_strGitPath + L"\\" + *it + L"\\" + fileInfo.strFileName;
-        GetFileSizeAndMd5(strFileName, size, md5);
-
-        if (md5.IsEmpty()) continue;
-
-        if (md5 != fileInfo.strMd5)
-        {
-            fileInfo.fUpdate = TRUE;
-            break;
-        }
-        else 
-        {
-            fileInfo.fUpdate = FALSE;
-            break;
-        }
-    }
+    // 获取文件更新状态
+    GetUpdateStatus(fileInfo);
 }
 
 // 获取文件名字
@@ -513,6 +493,38 @@ void CUnzipTask::GetFileLocation(CString strFilePath, CString &strFileLocation)
 
      CString strFileLocationTmp(tmp.c_str());
      strFileLocation = strFileLocationTmp;
+
+     m_strBranch.ReleaseBuffer();
+     strFilePath.ReleaseBuffer();
+}
+
+void CUnzipTask::GetUpdateStatus(FILE_INFO &fileInfo)
+{
+    std::set<CString> location = CFunction::SplitCString(fileInfo.strFileLocation, L";");
+    std::set<CString>::iterator it = location.begin();
+    std::set<CString>::iterator itEnd = location.end();
+
+    fileInfo.fUpdate = TRUE;
+    for (; it != itEnd; ++it)
+    {
+        DWORD size;
+        CString md5;
+        CString strFileName = m_strGitPath + L"\\" + *it + L"\\" + fileInfo.strFileName;
+        GetFileSizeAndMd5(strFileName, size, md5);
+
+        if (md5.IsEmpty()) continue;
+
+        if (md5 != fileInfo.strMd5)
+        {
+            fileInfo.fUpdate = TRUE;
+            break;
+        }
+        else 
+        {
+            fileInfo.fUpdate = FALSE;
+            break;
+        }
+    }
 }
 
 void CPushTask::DeleteFileByConfig()
@@ -540,6 +552,9 @@ void CPushTask::DeleteFileByConfig()
             DeleteFile(CFunction::s2ws(szPath).c_str());
         }
     }
+
+    m_strBranch.ReleaseBuffer();
+    m_strGitPath.ReleaseBuffer();
 }
 
 void CPushTask::UpdateFileByConfig()
@@ -573,16 +588,21 @@ void CPushTask::DoTask(void *pvParam, OVERLAPPED *pOverlapped)
 	CString  strLogGitResult;
 	CString  strLogCommit, strLogPush;
 	CFunction::ExeCmd(L"git add .", m_strGitPath);
-    strLogCommit = CFunction::ExeCmd(L"git commit -m " + m_strNote, m_strGitPath);
-	strLogPush	 = CFunction::ExeCmd(L"git push --set-upstream origin "+m_strBranch, m_strGitPath);
+    strLogCommit = CFunction::ExeCmd(L"git commit -m " + (L"\"" + m_strNote + L"\""), m_strGitPath);
+	strLogPush	 = CFunction::ExeCmd(L"git push --set-upstream origin " + m_strBranch, m_strGitPath);
 	strLogGitResult = strLogGitResult + L"Commit:\r\n" + strLogCommit + L"\r\nPush:\r\n" + strLogPush + L"\r\n\r\n";
 
 	PostMessage(m_hWnd, WM_LOG_GIT_INFO, (WPARAM)new CString(strLogGitResult), NULL);
 }
 
-CPushTask::CPushTask(HWND hWnd, const Json::Value &jvRoot, const std::set<FILE_INFO *> &setFileInfo, const CString &strGitPath, const CString &strBranch, const CString &strNote) : m_hWnd(hWnd), m_jvRoot(jvRoot), m_setFileInfo(setFileInfo), m_strBranch(strBranch), m_strGitPath(strGitPath), m_strNote(strNote)
+CPushTask::CPushTask(HWND hWnd, const Json::Value &jvRoot, const std::set<FILE_INFO *> &setFileInfo, const CString &strGitPath, const CString &strBranch, const CString &strNote) 
+    : m_hWnd(hWnd)
+    , m_jvRoot(jvRoot)
+    , m_setFileInfo(setFileInfo)
+    , m_strBranch(strBranch)
+    , m_strGitPath(strGitPath)
+    , m_strNote(strNote)
 {
-
 }
 
 

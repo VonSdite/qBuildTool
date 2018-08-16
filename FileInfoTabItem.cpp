@@ -57,13 +57,14 @@ BOOL CFileInfoTabItem::OnInitDialog()
 
 	//插入列
 	m_lvwFileInfo.InsertColumn( 0, L"文件名", LVCFMT_LEFT, 120 );
-	m_lvwFileInfo.InsertColumn( 1, L"MD5", LVCFMT_LEFT, 200 );
+	m_lvwFileInfo.InsertColumn( 1, L"MD5", LVCFMT_LEFT, 200);
 	m_lvwFileInfo.InsertColumn( 2, L"版本", LVCFMT_LEFT, 80 );
 	m_lvwFileInfo.InsertColumn( 3, L"大小（字节）", LVCFMT_LEFT, 90 );
 	m_lvwFileInfo.InsertColumn( 4, L"签名时间", LVCFMT_LEFT, 120 );
 	m_lvwFileInfo.InsertColumn( 5, L"是否有更新", LVCFMT_LEFT, 80 );
-	m_lvwFileInfo.InsertColumn( 6, L"对应存放位置", LVCFMT_LEFT, 1920 );
+	m_lvwFileInfo.InsertColumn( 6, L"对应存放位置", LVCFMT_LEFT, 250 );
 
+    m_lvwFileInfo.GetHeaderCtrl()->EnableWindow(FALSE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -83,6 +84,8 @@ void CFileInfoTabItem::InsertFileInfo(FILE_INFO *fileInfo)
     m_lvwFileInfo.SetItemText(nRow, 4, fileInfo->strSignTime);
     m_lvwFileInfo.SetItemText(nRow, 5, fileInfo->fUpdate?L"是":L"否");
     m_lvwFileInfo.SetItemText(nRow, 6, (fileInfo->strFileLocation.IsEmpty())?L"未在配置文件中设置":fileInfo->strFileLocation);
+
+    AutoAdjustColumnWidth(&m_lvwFileInfo);
 }
 
 /////////////////////////////////////////“文件信息”输出框////////////////////////////////////////////////////
@@ -172,6 +175,28 @@ HRESULT CFileInfoTabItem::OnCopy(WPARAM wParam, LPARAM lParam)
     OnCopyMenu();
     return TRUE;
 }
+
+
+void CFileInfoTabItem::AutoAdjustColumnWidth(CListCtrl *pListCtrl)
+{
+    pListCtrl->SetRedraw(FALSE);
+    CHeaderCtrl *pHeader = pListCtrl->GetHeaderCtrl();
+    int nColumnCount = pHeader->GetItemCount();
+
+
+    for(int i = 0; i < nColumnCount; i++)
+    {
+        pListCtrl->SetColumnWidth(i, LVSCW_AUTOSIZE);
+        int nColumnWidth = pListCtrl->GetColumnWidth(i);
+        pListCtrl->SetColumnWidth(i, LVSCW_AUTOSIZE_USEHEADER);
+        int nHeaderWidth = pListCtrl->GetColumnWidth(i);
+
+
+        pListCtrl->SetColumnWidth(i, max(nColumnWidth, nHeaderWidth)+5);
+    }
+    pListCtrl->SetRedraw(TRUE);
+}
+
 
 //// 窗口界面框放大后界面自适应
 //void CFileInfoTab::OnSize(UINT nType, int cx, int cy)

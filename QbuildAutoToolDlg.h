@@ -14,7 +14,7 @@ class CQbuildAutoToolDlg : public CDialog
 {
 // Construction
 public:
-	CQbuildAutoToolDlg(CWnd* pParent = NULL);	        // standard constructor
+	CQbuildAutoToolDlg(CWnd* pParent = NULL);	           // standard constructor
     ~CQbuildAutoToolDlg();
 	BOOL PreTranslateMessage(MSG* pMsg);
 
@@ -24,9 +24,6 @@ public:
 protected:
 	virtual void        DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
-
-// Implementation
-protected:
 	HICON m_hIcon;
 
 	// Generated message map functions
@@ -41,19 +38,27 @@ public:
     afx_msg void        OnBnClickedPushFile();
     afx_msg void        OnBnClickedGetFile();
     afx_msg void        OnBnClickedBrowse();
-    afx_msg void        OnTcnSelchangeTabInfo(NMHDR *pNMHDR, LRESULT *pResult);
     afx_msg void        OnEnKillfocusEditGitPath();
     afx_msg void        OnEnChangeEditGitPath();
     afx_msg void        OnCbnSelchangeComboBranch();
+    afx_msg void        OnEnChangeEditUrlList();
+    afx_msg void        OnEnChangeEditNote();
+    afx_msg void        OnTimer(UINT_PTR nIDEvent);
+    afx_msg void        OnTcnSelchangeTabInfo(NMHDR *pNMHDR, LRESULT *pResult);
     afx_msg LRESULT     OnLogDownloadStatus(WPARAM, LPARAM);
     afx_msg LRESULT     OnShowFileInfo(WPARAM, LPARAM);
 	afx_msg LRESULT		OnLogGitInfo(WPARAM, LPARAM);
     afx_msg LRESULT     OnDownLoadFinished(WPARAM, LPARAM);
 
-    //// 对话框最大化
-    //afx_msg void OnSize(UINT nType, int cx, int cy);
-    //void ReSize();
-    
+    // 显示进度
+    void ShowProgress(const CString &strProgressStatus = L"");
+
+public:
+    CString                     m_strNote;
+    CButton                     m_btnPushFile;
+    CButton                     m_btnGetFile;
+    CString                     m_strUrls;
+
 private:
     CString                     m_strGitPath;
     CString                     m_strBranch;
@@ -63,20 +68,16 @@ private:
     CLogTabItem			        m_tabItemLog;
     CThreadPool<CParseWorker>   m_thrdpoolParse;
     Json::Value                 m_jvRoot;
-    BOOL                        m_fIsEditGitPathChange;
-	BOOL						m_fEnableGitPush;
     std::set<FILE_INFO*>        m_setFileInfo;
+    HICON                       m_hIconLoading[9];
 
+    // 标志文件是否全部下载成功 
+    BOOL                        m_fCompleteDownload;    
+    // 标志git仓库路径发生改变
+    BOOL                        m_fIsEditGitPathChange;
+
+    // 从json文件读取配置信息
     BOOL GetFileLocationFromJson();
+    // 清空文件信息列表和日志内容
     void Clear();
-public:
-	afx_msg void OnEnChangeEditUrlList();
-    afx_msg void OnEnChangeEditNote();
-
-	// 显示进度
-	void ShowProgress(const CString &strProgressStatus = L"");
-	CString m_strNote;
-	CButton m_btnPushFile;
-	CButton m_btnGetFile;
-	CString m_strUrls;
 };

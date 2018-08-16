@@ -31,7 +31,7 @@ CString CFunction::ExeCmd(CString pszCmd, CString szPath)
 	//∆Ù∂Ø√¸¡Ó––
 	PROCESS_INFORMATION pi;
 	TCHAR *pszCmdLine = pszCmd.GetBuffer(pszCmd.GetLength());
-    TCHAR *pszPath	  = szPath.IsEmpty()?NULL:szPath.GetBuffer(szPath.GetLength());
+    TCHAR *pszPath	  = szPath.IsEmpty()? NULL : szPath.GetBuffer();
 	if (!CreateProcess(NULL, pszCmdLine, NULL, NULL, TRUE, NULL, NULL, pszPath, &si, &pi))
 	{
         DWORD tmp = GetLastError();
@@ -52,6 +52,8 @@ CString CFunction::ExeCmd(CString pszCmd, CString szPath)
 	}
 	CloseHandle(hRead);
 
+    pszCmd.ReleaseBuffer();
+    szPath.ReleaseBuffer();
 	return strRet;
 }
 

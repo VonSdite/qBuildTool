@@ -40,6 +40,10 @@ public:
 private:
     DWORD       m_dwRow;
     HACCEL      m_hAcc;
+
+    // ÁÐ¿í×ÔÊÊÓ¦
+    void AutoAdjustColumnWidth(CListCtrl *pListCtrl);
+
 public:
     virtual BOOL PreTranslateMessage(MSG* pMsg);
 };

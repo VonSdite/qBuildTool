@@ -78,6 +78,7 @@ private:
     bool               QueryValue(const CString& ValueName, const CString& strFilePath, CString& RetStr);
     void               GetFileVersion(const CString& strFilePath, CString& strFileVersion);
     void               GetFileLocation(CString strFilePath, CString &strFileLocation);
+    void               GetUpdateStatus(FILE_INFO &fileInfo);
 };
 
 

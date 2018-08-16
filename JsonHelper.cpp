@@ -28,31 +28,3 @@ bool CJsonHelper::LoadJson(LPCTSTR lpFile, Json::Value& jvRoot)
 
     return bLoadSucc;
 }
-
-bool CJsonHelper::LoadJson(std::wstring &strDoc, Json::Value& jvRoot)
-{
-    bool bLoadSucc = false;
-
-    std::string strTmp = CFunction::ws2s(strDoc);
-
-    if (strDoc.empty())
-    {
-        return bLoadSucc;
-    }
-
-    try
-    {
-        Json::Reader _reader;
-
-        jvRoot = Json::Value(Json::nullValue);
-
-        bLoadSucc = _reader.parse(strTmp, jvRoot);
-        strDoc = CFunction::s2ws(strTmp);
-    }
-    catch(...)
-    {
-        return false;
-    }
-
-    return bLoadSucc;
-}

@@ -14,9 +14,7 @@ public:
 	afx_msg HBRUSH  OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
 	CString         m_strLog;
-	BOOL			m_fFirstLogUrlInfo;
-	BOOL			m_fFirstLogGitInfo;
-
+    CEdit           m_cbEditLog;
 
 // Dialog Data
 	enum { IDD = IDD_LOG };
@@ -25,8 +23,4 @@ protected:
 	virtual void    DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
-
-private:
-    CEdit           m_cbEditLog;
-
 };

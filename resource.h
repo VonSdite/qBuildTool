@@ -8,10 +8,19 @@
 #define IDD_QbuildAutoTool_DIALOG       102
 #define IDS_STRING102                   102
 #define IDS_CAPTION                     102
-#define IDR_MAINFRAME                   128
 #define IDR_MENU_COPY                   130
 #define IDD_FILE_INFO                   131
 #define IDD_LOG                         132
+#define IDB_BITMAP13                    152
+#define IDI_ICON1                       155
+#define IDI_ICON2                       156
+#define IDI_ICON3                       157
+#define IDI_ICON4                       158
+#define IDI_ICON5                       159
+#define IDI_ICON6                       160
+#define IDI_ICON7                       161
+#define IDI_ICON8                       162
+#define IDI_ICON9                       163
 #define IDC_EDIT1                       1000
 #define IDC_EDIT_GIT_PATH               1000
 #define IDC_EDIT_LOG                    1000
@@ -38,7 +47,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        135
+#define _APS_NEXT_RESOURCE_VALUE        168
 #define _APS_NEXT_COMMAND_VALUE         32774
 #define _APS_NEXT_CONTROL_VALUE         1037
 #define _APS_NEXT_SYMED_VALUE           104

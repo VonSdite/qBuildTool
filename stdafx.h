@@ -57,8 +57,6 @@
 
 
 #include "json/json.h"
-#pragma comment(lib, "json/json.lib")
-
 #include "Function.h"
 
 
