@@ -30,7 +30,7 @@ public:
 	afx_msg void OnCopyMenu();
     afx_msg HRESULT OnCopy(WPARAM, LPARAM);
     virtual BOOL OnInitDialog();
-    void InsertFileInfo(FILE_INFO *fileInfo);
+    void InsertFileInfo(FILE_INFO *fileInfo, BOOL fhadAppeared);
 
     // 对话框最大化
 	//afx_msg void OnSize(UINT nType, int cx, int cy);
@@ -46,4 +46,6 @@ private:
 
 public:
     virtual BOOL PreTranslateMessage(MSG* pMsg);
+    afx_msg void OnNMCustomdrawList2(NMHDR *pNMHDR, LRESULT *pResult);
+    void SetFileSuccessUpdate(DWORD dwIndex);
 };

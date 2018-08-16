@@ -35,6 +35,7 @@
 
 #include <map>
 #include <set>
+#include <vector>
 #include <afx.h>
 #include <afxinet.h>
 #include <fstream>

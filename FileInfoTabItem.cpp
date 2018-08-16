@@ -33,6 +33,7 @@ BEGIN_MESSAGE_MAP(CFileInfoTabItem, CDialog)
     ON_MESSAGE(WM_COPY_INFO, &CFileInfoTabItem::OnCopy)
 //    ON_NOTIFY(LVN_HOTTRACK, IDC_LIST2, &CFileInfoTabItem::OnLvnHotTrackList2)
 //ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_LIST2, &CFileInfoTabItem::OnNMReleasedcaptureList2)
+ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST2, &CFileInfoTabItem::OnNMCustomdrawList2)
 END_MESSAGE_MAP()
 
 
@@ -71,12 +72,15 @@ BOOL CFileInfoTabItem::OnInitDialog()
 }
 
 
-void CFileInfoTabItem::InsertFileInfo(FILE_INFO *fileInfo)
+void CFileInfoTabItem::InsertFileInfo(FILE_INFO *fileInfo, BOOL fhadAppeared)
 {
     CString strSize;
     strSize.Format(L"%d B", fileInfo->dwSize);
 
     int nRow = m_lvwFileInfo.InsertItem(m_dwRow++, fileInfo->strFileName);
+
+    if (fhadAppeared)
+        m_lvwFileInfo.SetItemData(nRow, COLOR_RED);
     //设置数据
     m_lvwFileInfo.SetItemText(nRow, 1, fileInfo->strMd5);
     m_lvwFileInfo.SetItemText(nRow, 2, fileInfo->strVersion);
@@ -241,3 +245,35 @@ void CFileInfoTabItem::AutoAdjustColumnWidth(CListCtrl *pListCtrl)
 //
 //    //m_lvwFileInfo.SetItemState(nItem, LVIS_SELECTED,  LVIS_SELECTED);
 //}
+
+void CFileInfoTabItem::OnNMCustomdrawList2(NMHDR *pNMHDR, LRESULT *pResult)
+{
+    LPNMTVCUSTOMDRAW pNMCD = reinterpret_cast<LPNMTVCUSTOMDRAW>(pNMHDR);
+
+    // TODO: 在此添加控件通知处理程序代码
+    NMCUSTOMDRAW nmCustomDraw = pNMCD->nmcd;
+    switch(nmCustomDraw.dwDrawStage)
+    {
+    case CDDS_ITEMPREPAINT:
+        {
+            if (COLOR_RED == nmCustomDraw.lItemlParam)
+            {
+                pNMCD->clrTextBk = RGB(255, 0, 0);		    //背景颜色
+                pNMCD->clrText = RGB(255, 255, 255);		//文字颜色
+            }
+           
+            break;
+        }
+    default:
+            break;	
+    }
+
+    *pResult = 0;
+    *pResult |= CDRF_NOTIFYPOSTPAINT;		//必须有，不然就没有效果
+    *pResult |= CDRF_NOTIFYITEMDRAW;		//必须有，不然就没有效果
+}
+
+void CFileInfoTabItem::SetFileSuccessUpdate(DWORD dwIndex)
+{
+    m_lvwFileInfo.SetItemText(dwIndex, 5, L"否");
+}

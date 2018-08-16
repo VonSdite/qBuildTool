@@ -2,6 +2,8 @@
 #include "CParseWorker.h"
 #include "Function.h"
 
+std::map<CString, BOOL> CUnzipTask::mapRecordExist;
+
 CDownloadTask::CDownloadTask(HWND hWnd, std::set<CString> urls) 
     : m_hWnd(hWnd)
     , m_strUrls(urls)
@@ -39,7 +41,6 @@ void CDownloadTask::DoTask(void *pvParam, OVERLAPPED *pOverlapped)
     PostMessage(m_hWnd, WM_DOWNLOAD_FINISHED, NULL, NULL);
 }
 
-
 void CUnzipTask::DoTask(void *pvParam, OVERLAPPED *pOverlapped)
 {
     std::set<CString> strFiles = unzip(m_strFilePath);
@@ -50,11 +51,17 @@ void CUnzipTask::DoTask(void *pvParam, OVERLAPPED *pOverlapped)
     {
         FILE_INFO *fileInfo = new FILE_INFO;
         GetFileInfo(*iterFile, *fileInfo);
-        PostMessage(m_hWnd, WM_SHOW_FILE_INFO, (WPARAM)fileInfo, NULL);
+
+        BOOL fHadAppeared = FALSE;
+        CString strTmp = fileInfo->strFileName;
+        if (mapRecordExist[strTmp.MakeLower()])
+            fHadAppeared = TRUE;
+
+        mapRecordExist[strTmp.MakeLower()] = TRUE;
+
+        PostMessage(m_hWnd, WM_SHOW_FILE_INFO, (WPARAM)fileInfo, fHadAppeared);
     }
 }
-
-
 
 //обтьнд╪Ч
 CString CDownloadTask::DownloadSaveFile(CString strUrl) 
@@ -559,20 +566,28 @@ void CPushTask::DeleteFileByConfig()
 
 void CPushTask::UpdateFileByConfig()
 {
-    std::set<FILE_INFO*>::iterator iter		= m_setFileInfo.begin();
-    std::set<FILE_INFO*>::iterator iterEnd	= m_setFileInfo.end();
+    std::vector<FILE_INFO*>::iterator iter		= m_vecFileInfo.begin();
+    std::vector<FILE_INFO*>::iterator iterEnd	= m_vecFileInfo.end();
 
+    DWORD dwIndex = 0;
     for (; iter != iterEnd; ++iter)
     {
         std::set<CString>			setFilePath = CFunction::SplitCString((*iter)->strFileLocation, L";");
         std::set<CString>::iterator it			= setFilePath.begin();
+        BOOL fCopySuccess = FALSE;
         for (; it != setFilePath.end(); ++it)
         {
             CString strFullPath = m_strGitPath + L"\\" + (*it);
             SHCreateDirectoryEx(NULL, strFullPath, NULL);
             strFullPath = strFullPath + L"\\" + (*iter)->strFileName;
-            CopyFile(SAVE_PATH + (*iter)->strFileName, strFullPath, FALSE);
+            fCopySuccess = CopyFile(SAVE_PATH + (*iter)->strFileName, strFullPath, FALSE);
         }
+        
+        if (fCopySuccess)
+        {
+            PostMessage(m_hWnd, WM_UPDATE_SUCCESS, dwIndex, NULL);
+        }
+        ++dwIndex;
     }
 }
 
@@ -595,10 +610,10 @@ void CPushTask::DoTask(void *pvParam, OVERLAPPED *pOverlapped)
 	PostMessage(m_hWnd, WM_LOG_GIT_INFO, (WPARAM)new CString(strLogGitResult), NULL);
 }
 
-CPushTask::CPushTask(HWND hWnd, const Json::Value &jvRoot, const std::set<FILE_INFO *> &setFileInfo, const CString &strGitPath, const CString &strBranch, const CString &strNote) 
+CPushTask::CPushTask(HWND hWnd, const Json::Value &jvRoot, const std::vector<FILE_INFO*> &vecFileInfo, const CString &strGitPath, const CString &strBranch, const CString &strNote) 
     : m_hWnd(hWnd)
     , m_jvRoot(jvRoot)
-    , m_setFileInfo(setFileInfo)
+    , m_vecFileInfo(vecFileInfo)
     , m_strBranch(strBranch)
     , m_strGitPath(strGitPath)
     , m_strNote(strNote)

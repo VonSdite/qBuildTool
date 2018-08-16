@@ -6,6 +6,7 @@
 #define DOWNLOADING                     L" - 正在下载文件, 请稍后..."
 #define PUSHING                         L" - 正在入库, 请稍后..."
 #define WARNING                         L"警告"
+#define MYERROR                         L"错误"
 #define TIP                             L"提示"
 
 // 计时器时间
@@ -20,9 +21,11 @@
 #define WM_SHOW_FILE_INFO               (WM_USER+4)
 #define WM_COPY_INFO                    (WM_USER+5)
 #define WM_DOWNLOAD_FINISHED            (WM_USER+6)
+#define WM_UPDATE_SUCCESS               (WM_USER+7)
 
 #define RECVPACK_SIZE                   2048
 #define THREADPOOL_SIZE                 5
+#define COLOR_RED                       1
 
 
 #endif

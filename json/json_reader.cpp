@@ -180,7 +180,7 @@ Reader::parse( const char *beginDoc, const char *endDoc,
    {
       if ( !root.isArray()  &&  !root.isObject() )
       {
-         // Set error location to start of doc, ideally should be first token found in doc
+         // set error location to start of doc, ideally should be first token found in doc
          token.type_ = tokenError;
          token.start_ = beginDoc;
          token.end_ = endDoc;

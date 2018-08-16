@@ -49,6 +49,7 @@ public:
     afx_msg LRESULT     OnShowFileInfo(WPARAM, LPARAM);
 	afx_msg LRESULT		OnLogGitInfo(WPARAM, LPARAM);
     afx_msg LRESULT     OnDownLoadFinished(WPARAM, LPARAM);
+    afx_msg LRESULT     OnFileUpdateSuccess(WPARAM, LPARAM);
 
     // 显示进度
     void ShowProgress(const CString &strProgressStatus = L"");
@@ -68,13 +69,14 @@ private:
     CLogTabItem			        m_tabItemLog;
     CThreadPool<CParseWorker>   m_thrdpoolParse;
     Json::Value                 m_jvRoot;
-    std::set<FILE_INFO*>        m_setFileInfo;
+    std::vector<FILE_INFO*>     m_vecFileInfo;
     HICON                       m_hIconLoading[9];
 
     // 标志文件是否全部下载成功 
     BOOL                        m_fCompleteDownload;    
     // 标志git仓库路径发生改变
     BOOL                        m_fIsEditGitPathChange;
+    BOOL                        m_fCanPush;
 
     // 从json文件读取配置信息
     BOOL GetFileLocationFromJson();

@@ -39,5 +39,6 @@
 *.ncb
 Temp/*
 Debug/*
+Release/*
 *.aps
 *.suo

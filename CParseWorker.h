@@ -63,12 +63,14 @@ public:
 
     void DoTask(void *pvParam, OVERLAPPED *pOverlapped);
 
+    static std::map<CString, BOOL> mapRecordExist;
+
 private:
-    CString         m_strFilePath;
-    HWND            m_hWnd;
-    CString         m_strBranch;
-    CString         m_strGitPath;
-    Json::Value     m_jvRoot;
+    CString			   m_strFilePath;
+    HWND			   m_hWnd;
+    CString			   m_strBranch;
+    CString			   m_strGitPath;
+    Json::Value		   m_jvRoot;
 
     std::set<CString>  unzip(CString strSaveFile);  
     void               GetFileInfo(CString strFileName, FILE_INFO &fileInfo);
@@ -81,17 +83,15 @@ private:
     void               GetUpdateStatus(FILE_INFO &fileInfo);
 };
 
-
-
 class CPushTask : public CTaskBase
 {
 public:
-    CPushTask(HWND hWnd, const Json::Value &jvRoot, const std::set<FILE_INFO *> &setFileInfo, const CString &strGitPath, const CString &strBranch, const CString &strNote);
+    CPushTask(HWND hWnd, const Json::Value &jvRoot, const std::vector<FILE_INFO*> &vecFileInfo, const CString &strGitPath, const CString &strBranch, const CString &strNote);
     void DoTask(void *pvParam, OVERLAPPED *pOverlapped);
 private:
 	HWND					m_hWnd;
     Json::Value				m_jvRoot;
-    std::set<FILE_INFO *>	m_setFileInfo;
+    std::vector<FILE_INFO*>	m_vecFileInfo;
     CString					m_strBranch;
     CString					m_strGitPath;
     CString					m_strNote;

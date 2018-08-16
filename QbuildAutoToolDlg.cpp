@@ -50,6 +50,7 @@ CQbuildAutoToolDlg::CQbuildAutoToolDlg(CWnd* pParent /*=NULL*/)
     , m_strNote(_T(""))
 	, m_strUrls(_T(""))
     , m_fCompleteDownload(TRUE)
+    , m_fCanPush(TRUE)
 {
     _CrtSetBreakAlloc(1533);
 	m_hIcon = AfxGetApp()->LoadIcon(IDI_ICON1);
@@ -61,11 +62,11 @@ CQbuildAutoToolDlg::CQbuildAutoToolDlg(CWnd* pParent /*=NULL*/)
 CQbuildAutoToolDlg::~CQbuildAutoToolDlg()
 {
     // 清空“文件消息”框中保存的每行信息
-    std::set<FILE_INFO *>::iterator iter = m_setFileInfo.begin(); 
-    for (; iter != m_setFileInfo.end();)
+    std::vector<FILE_INFO*>::iterator iter = m_vecFileInfo.begin(); 
+    for (; iter != m_vecFileInfo.end();)
     {
         delete *iter;
-        m_setFileInfo.erase(iter++);
+        m_vecFileInfo.erase(iter++);
     }
 
 	// 将临时文件夹删除
@@ -99,6 +100,7 @@ BEGIN_MESSAGE_MAP(CQbuildAutoToolDlg, CDialog)
 	ON_MESSAGE(WM_LOG_GIT_INFO, &CQbuildAutoToolDlg::OnLogGitInfo)
     ON_MESSAGE(WM_SHOW_FILE_INFO, &CQbuildAutoToolDlg::OnShowFileInfo)
     ON_MESSAGE(WM_DOWNLOAD_FINISHED, &CQbuildAutoToolDlg::OnDownLoadFinished)
+    ON_MESSAGE(WM_UPDATE_SUCCESS, &CQbuildAutoToolDlg::OnFileUpdateSuccess)
 ON_EN_KILLFOCUS(IDC_EDIT_GIT_PATH, &CQbuildAutoToolDlg::OnEnKillfocusEditGitPath)
 ON_EN_CHANGE(IDC_EDIT_GIT_PATH, &CQbuildAutoToolDlg::OnEnChangeEditGitPath)
 ON_CBN_SELCHANGE(IDC_COMBO_BRANCH, &CQbuildAutoToolDlg::OnCbnSelchangeComboBranch)
@@ -132,10 +134,10 @@ BOOL CQbuildAutoToolDlg::OnInitDialog()
 		}
 	}
 
-	//  Set the icon for this dialog.  The framework does this automatically
+	//  set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
-	SetIcon(m_hIcon, FALSE);			// Set big icon
-	SetIcon(m_hIcon, TRUE);				// Set small icon
+	SetIcon(m_hIcon, FALSE);			// set big icon
+	SetIcon(m_hIcon, TRUE);				// set small icon
 
 	// 设置TabControl选项框
 	m_tabInfo.InsertItem(0, L"文件信息");
@@ -390,7 +392,7 @@ void CQbuildAutoToolDlg::OnBnClickedGetFile()
     }
 
     // 获取配置文件信息
-    GetFileLocationFromJson();
+    if(!GetFileLocationFromJson()) return;
 
     // 切换成文件信息tab
     m_tabInfo.SetCurSel(0);
@@ -400,9 +402,15 @@ void CQbuildAutoToolDlg::OnBnClickedGetFile()
     // 图标显示为加载
     SetTimer(ID_EVENT_DOWNLOADING, TIMER_SECOND, NULL);
 
+    // 允许入库
+    m_fCanPush = TRUE;
+
     // 开始获取文件
     m_btnGetFile.EnableWindow(FALSE);
     m_btnPushFile.EnableWindow(FALSE);
+
+    // 清除解压出来的文件历史
+    CUnzipTask::mapRecordExist.clear();
 
     // 清空信息
 	Clear();
@@ -480,7 +488,14 @@ LRESULT CQbuildAutoToolDlg::OnDownLoadFinished(WPARAM wParam, LPARAM lParam)
     SetIcon(m_hIcon, FALSE);
 
     if (!m_fCompleteDownload)
+	{
         MessageBox(L"存在链接下载失败，请查看日志", WARNING, MB_OK|MB_ICONWARNING);
+
+		// 切换成文件信息tab
+		m_tabInfo.SetCurSel(1);
+		m_tabItemFileInfo.ShowWindow(FALSE);
+		m_tabItemLog.ShowWindow(TRUE);
+	}
     m_fCompleteDownload = TRUE;
 
     m_btnGetFile.EnableWindow(TRUE);
@@ -494,8 +509,11 @@ LRESULT CQbuildAutoToolDlg::OnDownLoadFinished(WPARAM wParam, LPARAM lParam)
 LRESULT CQbuildAutoToolDlg::OnShowFileInfo(WPARAM wParam, LPARAM lParam)
 {
     FILE_INFO *fileInfo = (FILE_INFO *) wParam;
-    m_tabItemFileInfo.InsertFileInfo(fileInfo);
-    m_setFileInfo.insert(fileInfo); 
+    m_tabItemFileInfo.InsertFileInfo(fileInfo, lParam);
+    if (lParam)
+        m_fCanPush = FALSE;
+
+    m_vecFileInfo.push_back(fileInfo); 
 
     return TRUE;
 }
@@ -517,7 +535,7 @@ BOOL CQbuildAutoToolDlg::GetFileLocationFromJson()
 	}
 	else 
 	{
-		MessageBox(L"程序根目录需新建conf文件夹并放入QbuildAutoToolConfig.json, 请先设置配置文件", WARNING, MB_OK | MB_ICONERROR);
+		MessageBox(L"程序根目录需新建conf文件夹,\r\n并放入配置文件 \"QbuildAutoToolConfig.json\"\r\n请先设置配置文件", WARNING, MB_OK | MB_ICONERROR);
 		return FALSE;
 	}
 }
@@ -540,6 +558,12 @@ void CQbuildAutoToolDlg::OnBnClickedPushFile()
 		return;
 	}
 
+    if (!m_fCanPush)
+    {
+        MessageBox(L"有重复的提文件，请修改提文件URL，并重新获取文件", MYERROR, MB_ICONERROR);
+        return ;
+    }
+
     // 图标显示为加载
     SetTimer(ID_EVENT_PUSHING, TIMER_SECOND, NULL);
 
@@ -554,7 +578,7 @@ void CQbuildAutoToolDlg::OnBnClickedPushFile()
 
 	// 提示进度
 	ShowProgress(PUSHING);
-    CTaskBase *pTask = new CPushTask(this->GetSafeHwnd(), m_jvRoot, m_setFileInfo, m_strGitPath, m_strBranch, m_strNote);
+    CTaskBase *pTask = new CPushTask(this->GetSafeHwnd(), m_jvRoot, m_vecFileInfo, m_strGitPath, m_strBranch, m_strNote);
     m_thrdpoolParse.QueueRequest((CParseWorker::RequestType) pTask);
 }
 
@@ -605,11 +629,11 @@ void CQbuildAutoToolDlg::Clear()
     m_tabItemLog.m_strLog.Empty();
 
     // 清空“文件消息”框中保存的每行信息
-    std::set<FILE_INFO *>::iterator iter = m_setFileInfo.begin(); 
-    for (; iter != m_setFileInfo.end();)
+    std::vector<FILE_INFO*>::iterator iter = m_vecFileInfo.begin(); 
+    for (; iter != m_vecFileInfo.end();)
     {
         delete *iter;
-        m_setFileInfo.erase(iter++);
+        m_vecFileInfo.erase(iter++);
     }
 }
 
@@ -632,4 +656,11 @@ void CQbuildAutoToolDlg::OnTimer(UINT_PTR nIDEvent)
     }
 
     CDialog::OnTimer(nIDEvent);
+}
+
+// 设置某行文件“是否更新”为否
+LRESULT CQbuildAutoToolDlg::OnFileUpdateSuccess(WPARAM wParam, LPARAM lParam)
+{
+    m_tabItemFileInfo.SetFileSuccessUpdate(wParam);
+    return TRUE;
 }
