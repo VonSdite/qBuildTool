@@ -69,9 +69,8 @@ CString CDownloadTask::DownloadSaveFile(CString strUrl)
     CString strSaveFile = CFunction::GetNameFromUrl(strUrl);
 
     bool ret=false;
-    //CInternetSession Sess(TEXT("lpload"));
+    CInternetSession Sess;
 
-	CInternetSession Sess;
     Sess.SetOption(INTERNET_OPTION_CONNECT_TIMEOUT     , 2000); //2秒的连接超时
     Sess.SetOption(INTERNET_OPTION_SEND_TIMEOUT        , 2000); //2秒的发送超时
     Sess.SetOption(INTERNET_OPTION_RECEIVE_TIMEOUT     , 2000); //2秒的接收超时
@@ -100,8 +99,6 @@ CString CDownloadTask::DownloadSaveFile(CString strUrl)
             nBufLen = nLen;
             if (nLen <= 0) return L"";
 
-
-			
             //分配接收数据缓存
             pBuf = (char*)malloc(nLen+8);
             ZeroMemory(pBuf,nLen+8);

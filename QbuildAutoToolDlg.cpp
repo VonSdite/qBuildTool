@@ -51,6 +51,7 @@ CQbuildAutoToolDlg::CQbuildAutoToolDlg(CWnd* pParent /*=NULL*/)
 	, m_strUrls(_T(""))
     , m_fCompleteDownload(TRUE)
     , m_fCanPush(TRUE)
+	, m_fIsDownLoading(FALSE)
 {
     _CrtSetBreakAlloc(1533);
 	m_hIcon = AfxGetApp()->LoadIcon(IDI_ICON1);
@@ -335,7 +336,7 @@ void CQbuildAutoToolDlg::OnEnChangeEditUrlList()
 	// “获取文件”按钮的可用
     if (m_strUrls.IsEmpty())
 	    m_btnGetFile.EnableWindow(FALSE);
-    else 
+    else if (!m_strUrls.IsEmpty() && !m_fIsDownLoading)
         m_btnGetFile.EnableWindow(TRUE);
 }
 
@@ -403,6 +404,9 @@ void CQbuildAutoToolDlg::OnBnClickedGetFile()
 
     // 允许入库
     m_fCanPush = TRUE;
+
+	// 正在下载
+	m_fIsDownLoading = TRUE;
 
     // 开始获取文件
     m_btnGetFile.EnableWindow(FALSE);
@@ -496,9 +500,18 @@ LRESULT CQbuildAutoToolDlg::OnDownLoadFinished(WPARAM wParam, LPARAM lParam)
 		m_tabItemLog.ShowWindow(TRUE);
 	}
     m_fCompleteDownload = TRUE;
+	m_fIsDownLoading = FALSE;
 
     m_btnGetFile.EnableWindow(TRUE);
-    m_btnPushFile.EnableWindow(TRUE);
+
+	if (m_vecFileInfo.empty())
+	{
+		m_btnPushFile.EnableWindow(FALSE);
+	}
+	else
+	{
+		m_btnPushFile.EnableWindow(TRUE);
+	}
 
     ShowProgress();
     return TRUE;

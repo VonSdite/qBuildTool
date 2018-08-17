@@ -76,6 +76,7 @@ private:
     BOOL                        m_fCompleteDownload;    
     // 标志git仓库路径发生改变
     BOOL                        m_fIsEditGitPathChange;
+	BOOL						m_fIsDownLoading;
     BOOL                        m_fCanPush;
 
     // 从json文件读取配置信息
