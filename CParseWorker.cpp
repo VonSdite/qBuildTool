@@ -24,7 +24,6 @@ void CDownloadTask::DoTask(void *pvParam, OVERLAPPED *pOverlapped)
     std::set<CString>::iterator iterUrl		= m_strUrls.begin();
     std::set<CString>::iterator iterUrlEnd	= m_strUrls.end();
 
-    CString *strDownloadFileName; 
     for (; iterUrl!= iterUrlEnd; iterUrl++)
     {
         // œ¬‘ÿ≥…π¶
