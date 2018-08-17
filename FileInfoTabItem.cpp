@@ -169,8 +169,10 @@ BOOL CFileInfoTabItem::PreTranslateMessage(MSG* pMsg)
             SendMessage(WM_COPY_INFO, NULL, NULL);
             return TRUE;
         }
+		if (pMsg->wParam == VK_ESCAPE)	return TRUE;
+		if (pMsg->wParam == VK_RETURN)	return TRUE;
     }
-
+	
     return CDialog::PreTranslateMessage(pMsg);
 }
 
@@ -201,50 +203,6 @@ void CFileInfoTabItem::AutoAdjustColumnWidth(CListCtrl *pListCtrl)
     pListCtrl->SetRedraw(TRUE);
 }
 
-
-//// 窗口界面框放大后界面自适应
-//void CFileInfoTab::OnSize(UINT nType, int cx, int cy)
-//{
-//	CDialog::OnSize(nType, cx, cy);
-//
-//	// TODO: Add your message handler code here
-//	CRect rcWnd;
-//	GetWindowRect(&rcWnd); // 获得窗口坐标
-//	//if (m_listCtrlFileInfo.GetSafeHwnd())
-//	//{
-//	//	CRect rcListCtrl0, rcListCtrl;
-//	//	m_listCtrlFileInfo.GetClientRect(&rcListCtrl0);
-//	//	m_listCtrlFileInfo.GetWindowRect(&rcListCtrl);
-//	//	rcListCtrl.right = rcListCtrl.right * 2 ;
-//	//	rcListCtrl.bottom = rcListCtrl.bottom * 2  - 180;
-//	//	ScreenToClient(&rcListCtrl);
-//	//	m_listCtrlFileInfo.MoveWindow(rcListCtrl, TRUE);
-//	//	this->MoveWindow(rcListCtrl, TRUE);
-//	//}
-//}
-
-//void CFileInfoTabItem::OnLvnHotTrackList2(NMHDR *pNMHDR, LRESULT *pResult)
-//{
-//    //LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-//    //// TODO: 在此添加控件通知处理程序代码
-//    //*pResult = 0;
-//
-//    //if (!m_fLButtonDown) return ;
-//
-//    //DWORD dwPos = GetMessagePos();
-//    //CPoint point( LOWORD(dwPos), HIWORD(dwPos) );
-//
-//    //m_lvwFileInfo.ScreenToClient(&point);
-//
-//    //LVHITTESTINFO lvinfo;
-//    //lvinfo.pt = point;
-//    //lvinfo.flags = LVHT_ABOVE;
-//
-//    //UINT nFlag;
-//    //int nItem = m_lvwFileInfo.HitTest(point, &nFlag);
-//
-//    //m_lvwFileInfo.SetItemState(nItem, LVIS_SELECTED,  LVIS_SELECTED);
-//}
 
 void CFileInfoTabItem::OnNMCustomdrawList2(NMHDR *pNMHDR, LRESULT *pResult)
 {

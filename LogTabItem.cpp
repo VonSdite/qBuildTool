@@ -63,3 +63,15 @@ void CLogTabItem::ShowLogGitInfo(CString strGitResult)
 	m_strLog += strGitResult;
 	UpdateData(FALSE);
 }
+
+
+
+BOOL CLogTabItem::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: Add your specialized code here and/or call the base class
+	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ESCAPE)
+		return TRUE;
+	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+		return TRUE;
+	return CDialog::PreTranslateMessage(pMsg);
+}
