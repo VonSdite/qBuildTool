@@ -62,12 +62,11 @@ CQbuildAutoToolDlg::CQbuildAutoToolDlg(CWnd* pParent /*=NULL*/)
 CQbuildAutoToolDlg::~CQbuildAutoToolDlg()
 {
     // 清空“文件消息”框中保存的每行信息
-    std::vector<FILE_INFO*>::iterator iter = m_vecFileInfo.begin(); 
-    for (; iter != m_vecFileInfo.end();)
+    for (size_t i = 0; i < m_vecFileInfo.size(); ++i)
     {
-        delete *iter;
-        m_vecFileInfo.erase(iter++);
+        delete m_vecFileInfo[i];
     }
+    m_vecFileInfo.clear();
 
 	// 将临时文件夹删除
 	CFunction::RemoveDir(L"Temp");
@@ -560,7 +559,7 @@ void CQbuildAutoToolDlg::OnBnClickedPushFile()
 
     if (!m_fCanPush)
     {
-        MessageBox(L"有重复的提文件，请修改提文件URL，并重新获取文件", MYERROR, MB_ICONERROR);
+        MessageBox(L"有重复的提测文件，请修改提测文件URL，并重新获取文件", MYERROR, MB_ICONERROR);
         return ;
     }
 
@@ -629,12 +628,11 @@ void CQbuildAutoToolDlg::Clear()
     m_tabItemLog.m_strLog.Empty();
 
     // 清空“文件消息”框中保存的每行信息
-    std::vector<FILE_INFO*>::iterator iter = m_vecFileInfo.begin(); 
-    for (; iter != m_vecFileInfo.end();)
+    for (size_t i = 0; i < m_vecFileInfo.size(); ++i)
     {
-        delete *iter;
-        m_vecFileInfo.erase(iter++);
+        delete m_vecFileInfo[i];
     }
+    m_vecFileInfo.clear();
 }
 
 void CQbuildAutoToolDlg::OnTimer(UINT_PTR nIDEvent)
