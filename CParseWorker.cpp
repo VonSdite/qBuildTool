@@ -27,9 +27,8 @@ void CDownloadTask::DoTask(void *pvParam, OVERLAPPED *pOverlapped)
     CString *strDownloadFileName; 
     for (; iterUrl!= iterUrlEnd; iterUrl++)
     {
-        strDownloadFileName = new CString(DownloadSaveFile(*iterUrl));
         // ÏÂÔØ³É¹¦
-        if (!strDownloadFileName->IsEmpty())
+        if (!DownloadSaveFile(*iterUrl).IsEmpty())
         {
             PostMessage(m_hWnd, WM_COMPLETE_DOWNLOAD, (WPARAM)new CString(*iterUrl), TRUE);
         }
