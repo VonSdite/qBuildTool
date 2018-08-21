@@ -503,15 +503,7 @@ LRESULT CQbuildAutoToolDlg::OnDownLoadFinished(WPARAM wParam, LPARAM lParam)
 	m_fIsDownLoading = FALSE;
 
     m_btnGetFile.EnableWindow(TRUE);
-
-	if (m_vecFileInfo.empty())
-	{
-		m_btnPushFile.EnableWindow(FALSE);
-	}
-	else
-	{
-		m_btnPushFile.EnableWindow(TRUE);
-	}
+	m_btnPushFile.EnableWindow(TRUE);
 
     ShowProgress();
     return TRUE;
