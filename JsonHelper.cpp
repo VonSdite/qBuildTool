@@ -19,7 +19,11 @@ bool CJsonHelper::LoadJson(LPCTSTR lpFile, Json::Value& jvRoot)
         std::ifstream _config;
 
         _config.open(lpFile, std::ios::in);
-        bLoadSucc = _reader.parse(_config, jvRoot);
+        std::stringstream buffer;
+        buffer << _config.rdbuf();
+        std::string _strConfig(buffer.str());
+        CFunction::stolower(_strConfig);
+        bLoadSucc = _reader.parse(_strConfig, jvRoot);
     }
     catch(...)
     {

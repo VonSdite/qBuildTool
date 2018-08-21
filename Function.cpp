@@ -188,3 +188,9 @@ CString CFunction::GetNameFromUrl(CString strUrl)
     strSaveFile = SAVE_PATH + strSaveFile;
     return strSaveFile;
 }
+
+std::string& CFunction::stolower(std::string& str)
+{
+    transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str;
+}

@@ -478,12 +478,14 @@ void CUnzipTask::GetFileLocation(CString strFilePath, CString &strFileLocation)
      strFilePath = strFilePath.Right(strFilePath.GetLength() - strFilePath.ReverseFind(L'\\') - 1);
      szBranch    = CT2A(m_strBranch.GetBuffer());
      szFilePath  = CT2A(strFilePath.GetBuffer());
+     CFunction::stolower(szBranch);
+     CFunction::stolower(szFilePath);
 
      Json::Value arrFilePath;
-     arrFilePath = m_jvRoot["Repository"][szBranch][szFilePath];
+     arrFilePath = m_jvRoot["repository"][szBranch][szFilePath];
 
      if (arrFilePath.size() == 0)
-        arrFilePath = m_jvRoot["Repository"]["Default"][szFilePath];
+        arrFilePath = m_jvRoot["repository"]["default"][szFilePath];
 
      std::string tmp;
      for (size_t i = 0; i < arrFilePath.size(); ++i)
@@ -537,10 +539,12 @@ void CPushTask::DeleteFileByConfig()
 
 	szBranch    = CT2A(m_strBranch.GetBuffer());
     szGitPath   = CT2A(m_strGitPath.GetBuffer());
-    arrFilePath = m_jvRoot["DeleteFile"][szBranch];
+    CFunction::stolower(szBranch);
+    CFunction::stolower(szGitPath);
+    arrFilePath = m_jvRoot["deletefile"][szBranch];
 
     if (arrFilePath.size() == 0)
-        arrFilePath = m_jvRoot["DeleteFile"]["Default"];
+        arrFilePath = m_jvRoot["deletefile"]["default"];
 
     Json::Value::Members		   mem = arrFilePath.getMemberNames();
     Json::Value::Members::iterator it  = mem.begin();
@@ -550,7 +554,7 @@ void CPushTask::DeleteFileByConfig()
         std::string szFileName = *it;
         for(size_t i = 0; i < arrFilePath[*it].size(); ++i)
         {
-            std::string szPath = szGitPath + arrFilePath[*it][i].asString() + "\\" + szFileName;
+            std::string szPath = szGitPath + "\\" + arrFilePath[*it][i].asString() + "\\" + szFileName;
             DeleteFile(CFunction::s2ws(szPath).c_str());
         }
     }

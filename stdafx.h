@@ -33,6 +33,8 @@
 
 #include <afxcontrolbars.h>     // MFC support for ribbons and control bars
 
+#include <sstream>
+#include <algorithm>
 #include <map>
 #include <set>
 #include <vector>

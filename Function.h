@@ -31,4 +31,6 @@ public:
     // stringתwstring
     static std::wstring         s2ws(const std::string& s);
 
+    static std::string&         stolower(std::string& str);
+
 };
